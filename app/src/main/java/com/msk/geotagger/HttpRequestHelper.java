@@ -1,16 +1,23 @@
 package com.msk.geotagger;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
@@ -23,12 +30,22 @@ import java.io.UnsupportedEncodingException;
  */
 public class HttpRequestHelper 
 {	@SuppressWarnings("unchecked")
-	public HttpResponse sendLocation(Location loc, Context mContext)
+
+    private Context mContext;
+
+    public HttpRequestHelper(Context context)
+    {
+        mContext = context;
+    }
+
+    //private static final String host = "http://192.237.166.7";
+    private static final String host = "http://192.168.0.24:8000";
+
+	public HttpResponse sendLocation(Location loc)
 	{
-        String url1="http://192.237.166.7/api/0.1/location/";
-        //String url2="http://192.168.0.24:8000/api/0.1/location/";
-        //String url3="http://10.0.2.2:8000/api/0.1/location/";
-		HttpPost request = new HttpPost(url1);
+        String url = host + "/api/0.1/location/";
+
+		HttpPost request = new HttpPost(url);
 
         DBAdapter db = new DBAdapter(mContext);
         Settings settings = db.getSettings();
@@ -122,4 +139,93 @@ public class HttpRequestHelper
 		}
 		
 	}
+
+    public void uploadImage(Uri image)
+    {
+        String url = host+ "/m/locpic";
+
+        //HttpPost request = new HttpPost(url);
+
+        DBAdapter db = new DBAdapter(mContext);
+        Settings settings = db.getSettings();
+
+
+        //request.setHeader("Accept", "application/json");
+        //request.setHeader("Content-Type", "application/json");
+        //request.setHeader("Authorization", "ApiKey "+ settings.getUsername() + ":" + settings.getApiKey() );
+
+
+        String[] imageRealPath = getRealPathFromURI(image).split("/");
+        pictureFileName = imageRealPath[imageRealPath.length-1];
+
+        try
+        {
+            Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), image);
+
+
+        }
+
+        catch (IOException e)
+        {
+
+        }
+    }
+
+    static String CRLF = "\r\n";
+    static String twoHyphens = "--";
+    static String boundary = "----------V4xnHDg04ehbqgZCaMO5jx";
+
+
+
+    private String pictureFileName = null;
+    private DataOutputStream dataStream = null;
+
+    private String TAG = "멀티파트 테스트";
+
+
+    /**
+     * write one form field to dataSream
+     * @param fieldName
+     * @param fieldValue
+     */
+
+    private void writeFormField(String fieldName, String fieldValue)  {
+
+        try
+        {
+
+            dataStream.writeBytes(twoHyphens + boundary + CRLF);
+            dataStream.writeBytes("Content-Disposition: form-data; name=\"" + fieldName + "\"" + CRLF);
+            dataStream.writeBytes(CRLF);
+            dataStream.writeBytes(fieldValue);
+            dataStream.writeBytes(CRLF);
+        }
+        catch(Exception e)
+        {
+            //System.out.println("AndroidUploader.writeFormField: got: " + e.getMessage());
+            Log.e(TAG, "AndroidUploader.writeFormField: " + e.getMessage());
+        }
+
+    }
+
+    public String getRealPathFromURI(Uri contentUri)
+    {
+        Cursor cursor = null;
+        try
+        {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = mContext.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        }
+
+        finally
+        {
+            if (cursor != null)
+            {
+                cursor.close();
+            }
+        }
+    }
 }
