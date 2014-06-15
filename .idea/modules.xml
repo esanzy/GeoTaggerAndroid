@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/4KTracker.iml" filepath="$PROJECT_DIR$/4KTracker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/GeoTagger.iml" filepath="$PROJECT_DIR$/GeoTagger.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

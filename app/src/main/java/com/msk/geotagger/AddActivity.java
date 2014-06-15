@@ -32,6 +32,7 @@ public class AddActivity extends Activity {
     private ImageView myImage;
     private Uri imageURI;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -334,8 +335,8 @@ public class AddActivity extends Activity {
 
             try
             {
-                Bitmap bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
-                myImage.setImageBitmap(bmp);
+                Bitmap myImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
+                myImage.setImageBitmap(myImageBitmap);
             }
             catch (IOException e)
             {
@@ -349,10 +350,15 @@ public class AddActivity extends Activity {
     {
 
         @Override
-        protected HttpResponse doInBackground(Location... params)
-        {
-            HttpRequestHelper helper = new HttpRequestHelper();
-            return helper.sendLocation(params[0], AddActivity.this);
+        protected HttpResponse doInBackground(Location... params) {
+            HttpRequestHelper helper = new HttpRequestHelper(AddActivity.this);
+
+            if (imageURI != null)
+            {
+                helper.uploadImage(imageURI);
+            }
+
+            return helper.sendLocation(params[0]);
         }
 
         @Override

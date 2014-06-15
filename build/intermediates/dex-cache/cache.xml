@@ -2,22 +2,22 @@
 <pre-dex-items>
 
     <item
-        dex="D:\Developemnt\Android\workspace\4KTracker\app\build\intermediates\pre-dexed\debug\support-v4-19.1.0-c38b2cbce8361f0afdba57cd0b33267390d7973b.jar"
-        jar="D:\Developemnt\Android\sdk\extras\android\m2repository\com\android\support\support-v4\19.1.0\support-v4-19.1.0.jar"
+        dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/classes-5abf561708ff1b5482ad094a2e94f093909412ce.jar"
+        jar="/home/junwon/Projects/Android/GeoTagger/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/classes.jar"
         jumboMode="false"
         revision="19.1.0"
-        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
+        sha1="3dfdf1db5ce5ea2999a5dcde8c8e650b02660059"/>
     <item
-        dex="D:\Developemnt\Android\workspace\4KTracker\app\build\intermediates\pre-dexed\debug\classes-9866c93a5a04f1dc6bf367eb049d315099e14ac2.jar"
-        jar="D:\Developemnt\Android\workspace\4KTracker\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\classes.jar"
+        dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/classes-c4b86c5be0caae6f6a645fe988f30262cdeaf6fc.jar"
+        jar="/home/junwon/Projects/Android/GeoTagger/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/classes.jar"
         jumboMode="false"
         revision="19.1.0"
         sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
     <item
-        dex="D:\Developemnt\Android\workspace\4KTracker\app\build\intermediates\pre-dexed\debug\classes-b7f77bf4f88647162eeb33c379ceebfae111cf7b.jar"
-        jar="D:\Developemnt\Android\workspace\4KTracker\build\intermediates\exploded-aar\com.google.android.gms\play-services\4.4.52\classes.jar"
+        dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/support-v4-19.1.0-7c86182249e12ce66cfe2789139e2d9be9329ccb.jar"
+        jar="/home/junwon/Devel/android-studio/sdk/extras/android/m2repository/com/android/support/support-v4/19.1.0/support-v4-19.1.0.jar"
         jumboMode="false"
         revision="19.1.0"
-        sha1="3dfdf1db5ce5ea2999a5dcde8c8e650b02660059"/>
+        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
 
 </pre-dex-items>
