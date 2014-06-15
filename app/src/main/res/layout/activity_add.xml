@@ -1,0 +1,622 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.msk.geotagger.AddFragment">
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/Add_Location"
+                android:id="@+id/textView"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:id="@+id/scrollView"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:orientation="vertical"
+                android:id="@+id/linearLayout"
+                android:paddingBottom="10dp">
+
+                <TextView
+                    android:id="@+id/q1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/question1" />
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:paddingLeft="15dp"
+                    android:background="#efefef" >
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q1_1"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q1_1" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q1_1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q1_2"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q1_2" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q1_2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q1_3"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q1_3" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q1_3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+                </TableLayout>
+
+                <TextView
+                    android:id="@+id/q2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/question2" />
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:paddingLeft="15dp"
+                    android:background="#efefef" >
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_1"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_1" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_2"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_2" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_3"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_3" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_4"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_4" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_5"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_5" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_6"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_6" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_6"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_7"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_7" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_7"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_8"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_8" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_8"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_9"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_9" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_9"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_10"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_10" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_10"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_11"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_11" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_11"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_12"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_12" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_12"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_13"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_13" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_13"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_14"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_14" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_14"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_15"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_15" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_15"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_16"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_16" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_16"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_17"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_17" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_17"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <TextView
+                            android:id="@+id/q2_18"
+                            android:layout_width="0dip"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/q2_18" />
+
+                        <CheckBox
+                            android:id="@+id/chk_q2_18"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+                </TableLayout>
+
+                <TextView
+                    android:id="@+id/q3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/question3" />
+
+                <TextView
+                    android:id="@+id/q3sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/question3_sub"
+                    android:textColor="#2222ee" />
+
+                <EditText
+                    android:id="@+id/editText1"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:background="#efefef"
+                    android:ems="10"
+                    android:inputType="textMultiLine" />
+
+                <TextView
+                    android:id="@+id/q4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/question4" />
+
+                <TextView
+                    android:id="@+id/q4sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/question4_sub"
+                    android:textColor="#2222ee" />
+
+                <EditText
+                    tools:ignore="TooManyViews"
+                    android:id="@+id/EditText2"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:background="#efefef"
+                    android:ems="10"
+                    android:inputType="textMultiLine" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/btn_photo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/Photo"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                    <TextView
+                        android:id="@+id/btn_take_photo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="@string/Take_Photo"
+                        android:textColor="#2222ee" />
+
+                    <TextView
+                        android:id="@+id/btn_select_photo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/Select_Photo"
+                        android:textColor="#2222ee" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp"
+                    android:orientation="vertical"
+                    android:background = "#efefef">
+
+                    <ImageView
+                        android:id="@+id/myImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="15dp"
+                        android:layout_marginTop="15dp"
+                        />
+                </LinearLayout>
+
+
+                <TextView
+                    android:id="@+id/q5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/question5" />
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:id="@+id/q5sub"
+                        android:layout_height="match_parent"
+                        android:text="@string/question5_sub"
+                        android:textColor="#2222ee"
+                        android:layout_width="0dp"
+                        android:layout_weight="0.88" />
+
+                    <CheckBox
+                        android:id="@+id/chk_q5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Email"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/editText3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textEmailAddress" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Phone"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/editText4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="phone" />
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Website"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/editText5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10" />
+            </LinearLayout>
+        </ScrollView>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:padding="8dp" >
+
+            <TextView
+                android:id="@+id/btn_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+                android:text="@string/Cancel"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#2222ee" />
+
+            <TextView
+                android:id="@+id/btn_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="12dp"
+                android:text="@string/Save"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#2222ee" />
+
+        </RelativeLayout>
+    </LinearLayout>
+</FrameLayout>
