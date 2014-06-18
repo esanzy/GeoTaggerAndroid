@@ -3,6 +3,7 @@ package com.msk.geotagger;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -17,8 +18,17 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
+import com.msk.geotagger.model.Location;
+import com.msk.geotagger.model.Settings;
+import com.msk.geotagger.utils.DBAdapter;
+import com.msk.geotagger.utils.HttpRequestHelper;
+
 import org.apache.http.HttpResponse;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -32,6 +42,8 @@ public class AddActivity extends Activity {
     private ImageView myImage;
     private Uri imageURI;
 
+    private DBAdapter dba;
+    private Settings settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +51,10 @@ public class AddActivity extends Activity {
         setContentView(R.layout.activity_add);
 
         //StrictMode.enableDefaults();
+
+        dba = new DBAdapter(AddActivity.this);
+        settings = dba.getSettings();
+
 
         /**
          * @since 2014-05-08
@@ -175,7 +191,7 @@ public class AddActivity extends Activity {
 
                 if(chkQ2_3.isChecked())
                 {
-                    loc.setIndigineousType(1);
+                    loc.setIndigenousType(1);
                 }
 
                 if(chkQ2_4.isChecked())
@@ -273,8 +289,7 @@ public class AddActivity extends Activity {
 
 
 
-                DBAdapter dba = new DBAdapter(AddActivity.this);
-                Settings settings = dba.getSettings();
+
 
 				/* http://shstarkr.tistory.com/158 참고 */
                 ConnectivityManager cManager;
@@ -291,12 +306,14 @@ public class AddActivity extends Activity {
                     //HttpRequestHelper postHelper = new HttpRequestHelper();
                     new AddActivityTask().execute(loc);
 
-                    dba.insertLocation(loc, true);
+                    loc.setSync(1);
+                    dba.insertLocation(loc);
                 }
 
                 else
                 {
-                    dba.insertLocation(loc, false);
+                    loc.setSync(0);
+                    dba.insertLocation(loc);
                 }
 
 
@@ -319,10 +336,8 @@ public class AddActivity extends Activity {
                 Uri currImageURI = data.getData();
 
                 imageURI = currImageURI;
-                //myImage.setImageURI(currImageURI);
             }
         }
-
     }
 
     @Override
@@ -342,7 +357,6 @@ public class AddActivity extends Activity {
             {
                 e.printStackTrace();
             }
-            //myImage.setImageURI(imageURI);
         }
     }
 
@@ -355,7 +369,19 @@ public class AddActivity extends Activity {
 
             if (imageURI != null)
             {
-                helper.uploadImage(imageURI);
+                //helper.uploadImage(imageURI);
+
+                Ion.with(AddActivity.this, HttpRequestHelper.host+"/m/locpic")
+                    .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
+                    .setMultipartParameter("username", settings.getUsername())
+                    .setMultipartFile("pic", new File(getRealPathFromURI(imageURI)))
+                    .asJsonObject()
+                    .setCallback(new FutureCallback<JsonObject>() {
+                        @Override
+                        public void onCompleted(Exception e, JsonObject result) {
+                            Log.d("파일업로드", "업로드");
+                        }
+                    });
             }
 
             return helper.sendLocation(params[0]);
@@ -368,6 +394,28 @@ public class AddActivity extends Activity {
             if(httpResponse != null)
             {
                 Log.i("응답", ""+httpResponse.getStatusLine().getStatusCode());
+            }
+        }
+    }
+
+    public String getRealPathFromURI(Uri contentUri)
+    {
+        Cursor cursor = null;
+
+        try
+        {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = this.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        }
+
+        finally
+        {
+            if (cursor != null)
+            {
+                cursor.close();
             }
         }
     }

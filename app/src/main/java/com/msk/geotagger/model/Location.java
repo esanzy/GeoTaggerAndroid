@@ -1,4 +1,7 @@
-package com.msk.geotagger;
+package com.msk.geotagger.model;
+
+import com.google.gson.JsonObject;
+
 
 import java.sql.Timestamp;
 
@@ -10,6 +13,8 @@ import java.sql.Timestamp;
  */
 public class Location 
 {
+    private int rowid;
+    private int sync;
 	private Timestamp created;
 	
 	private double latitude;
@@ -172,7 +177,7 @@ public class Location
         return indigenousType;
     }
 
-    public void setIndigineousType(int indigenousType)
+    public void setIndigenousType(int indigenousType)
     {
         this.indigenousType = indigenousType;
     }
@@ -365,5 +370,62 @@ public class Location
     public void setUser(String user)
     {
         this.user = user;
+    }
+
+    public int getSync() {
+        return sync;
+    }
+
+    public void setSync(int sync) {
+        this.sync = sync;
+    }
+
+    public int getRowid() {
+        return rowid;
+    }
+
+    public void setRowid(int rowid) {
+        this.rowid = rowid;
+    }
+
+    public JsonObject toJSON()
+    {
+        JsonObject json = new JsonObject();
+
+
+        json.addProperty("latitude", this.latitude);
+        json.addProperty("longitude", this.longitude);
+
+        json.addProperty("photoId", this.photoId);
+        json.addProperty("contactEmail", this.contactEmail);
+        json.addProperty("contactPhone", this.contactPhone);
+        json.addProperty("contactWebsite", this.contactWebsite);
+
+        json.addProperty("evanType", this.evanType);
+        json.addProperty("trainType", this.trainType);
+        json.addProperty("mercyType", this.mercyType);
+        json.addProperty("youthType", this.youthType);
+        json.addProperty("campusType", this.campusType);
+        json.addProperty("indigenousType", this.indigenousType);
+        json.addProperty("prisonType", this.prisonType);
+        json.addProperty("prostitutesType", this.prostitutesType);
+        json.addProperty("orphansType", this.orphansType);
+        json.addProperty("womenType", this.womenType);
+        json.addProperty("urbanType", this.urbanType);
+        json.addProperty("hospitalType", this.hospitalType);
+        json.addProperty("mediaType", this.mediaType);
+        json.addProperty("communityDevType", this.communityDevType);
+        json.addProperty("bibleStudyType", this.bibleStudyType);
+        json.addProperty("churchPlantingType", this.churchPlantingType);
+        json.addProperty("artsType", this.artsType);
+        json.addProperty("counselingType", this.counselingType);
+        json.addProperty("healthcareType", this.healthcareType);
+        json.addProperty("constructionType", this.constructionType);
+        json.addProperty("researchType", this.researchType);
+        json.addProperty("desc", this.desc);
+        json.addProperty("tags", this.tags);
+        json.addProperty("contactConfirmed", this.contactConfirmed);
+
+        return json;
     }
 }

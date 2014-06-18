@@ -1,25 +1,30 @@
-package com.msk.geotagger;
+package com.msk.geotagger.utils;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.util.Log;
+
+import com.msk.geotagger.model.Location;
+import com.msk.geotagger.model.Settings;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+
 
 /*
  * 
@@ -39,7 +44,7 @@ public class HttpRequestHelper
     }
 
     //private static final String host = "http://192.237.166.7";
-    private static final String host = "http://192.168.0.24:8000";
+    public static final String host = "http://172.16.2.241:8001";
 
 	public HttpResponse sendLocation(Location loc)
 	{
@@ -140,71 +145,22 @@ public class HttpRequestHelper
 		
 	}
 
+
+    private DefaultHttpClient mHttpClient;
+
     public void uploadImage(Uri image)
     {
+        HttpParams params = new BasicHttpParams();
+        params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+
+        mHttpClient = new DefaultHttpClient(params);
+
         String url = host+ "/m/locpic";
 
-        //HttpPost request = new HttpPost(url);
+        File imageFile = new File(getRealPathFromURI(image));
 
-        DBAdapter db = new DBAdapter(mContext);
-        Settings settings = db.getSettings();
+        HttpPost httppost = new HttpPost(url);
 
-
-        //request.setHeader("Accept", "application/json");
-        //request.setHeader("Content-Type", "application/json");
-        //request.setHeader("Authorization", "ApiKey "+ settings.getUsername() + ":" + settings.getApiKey() );
-
-
-        String[] imageRealPath = getRealPathFromURI(image).split("/");
-        pictureFileName = imageRealPath[imageRealPath.length-1];
-
-        try
-        {
-            Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), image);
-
-
-        }
-
-        catch (IOException e)
-        {
-
-        }
-    }
-
-    static String CRLF = "\r\n";
-    static String twoHyphens = "--";
-    static String boundary = "----------V4xnHDg04ehbqgZCaMO5jx";
-
-
-
-    private String pictureFileName = null;
-    private DataOutputStream dataStream = null;
-
-    private String TAG = "멀티파트 테스트";
-
-
-    /**
-     * write one form field to dataSream
-     * @param fieldName
-     * @param fieldValue
-     */
-
-    private void writeFormField(String fieldName, String fieldValue)  {
-
-        try
-        {
-
-            dataStream.writeBytes(twoHyphens + boundary + CRLF);
-            dataStream.writeBytes("Content-Disposition: form-data; name=\"" + fieldName + "\"" + CRLF);
-            dataStream.writeBytes(CRLF);
-            dataStream.writeBytes(fieldValue);
-            dataStream.writeBytes(CRLF);
-        }
-        catch(Exception e)
-        {
-            //System.out.println("AndroidUploader.writeFormField: got: " + e.getMessage());
-            Log.e(TAG, "AndroidUploader.writeFormField: " + e.getMessage());
-        }
 
     }
 

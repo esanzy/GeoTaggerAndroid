@@ -2,6 +2,12 @@
 <pre-dex-items>
 
     <item
+        dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/gson-2.2.4-5fa8af494bb6e11d081aded07560c08c233d059d.jar"
+        jar="/home/junwon/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.2.4/a60a5e993c98c864010053cb901b7eab25306568/gson-2.2.4.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="a60a5e993c98c864010053cb901b7eab25306568"/>
+    <item
         dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/classes-5abf561708ff1b5482ad094a2e94f093909412ce.jar"
         jar="/home/junwon/Projects/Android/GeoTagger/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/classes.jar"
         jumboMode="false"
@@ -19,5 +25,17 @@
         jumboMode="false"
         revision="19.1.0"
         sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
+    <item
+        dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/ion-1.2.4-a2dd63a4de354176737ef66974a1a2e976168105.jar"
+        jar="/home/junwon/.gradle/caches/modules-2/files-2.1/com.koushikdutta.ion/ion/1.2.4/776baf5cac8eb4145dc0901254122cf956a784e3/ion-1.2.4.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="776baf5cac8eb4145dc0901254122cf956a784e3"/>
+    <item
+        dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/androidasync-1.2.4-40c5acf3c2218917a65ed6b656d2d35ebc7037ec.jar"
+        jar="/home/junwon/.gradle/caches/modules-2/files-2.1/com.koushikdutta.async/androidasync/1.2.4/8dc7111050ee5f13a54b1206d47fee856159b2aa/androidasync-1.2.4.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="8dc7111050ee5f13a54b1206d47fee856159b2aa"/>
 
 </pre-dex-items>

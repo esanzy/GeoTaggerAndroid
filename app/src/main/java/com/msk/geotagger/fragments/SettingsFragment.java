@@ -1,7 +1,5 @@
-package com.msk.geotagger;
+package com.msk.geotagger.fragments;
 
-import android.app.Activity;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -12,6 +10,17 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
+import com.msk.geotagger.model.Location;
+import com.msk.geotagger.utils.DBAdapter;
+import com.msk.geotagger.R;
+import com.msk.geotagger.model.Settings;
+import com.msk.geotagger.utils.HttpRequestHelper;
+
+import java.util.List;
 
 
 public class SettingsFragment extends Fragment
@@ -91,10 +100,10 @@ public class SettingsFragment extends Fragment
 
         Log.d("환경설정", ""+settings.getApiKey());
 
-        int numSyncData = settings.getNumSyncData();
+        int numSyncData = db.countUnsyncedData();
         String txtSyncData = "You need to sync " + numSyncData + " data";
 
-        TextView tvSyncData = (TextView)v.findViewById(R.id.txtSyncData);
+        final TextView tvSyncData = (TextView)v.findViewById(R.id.txtSyncData);
         tvSyncData.setText(txtSyncData);
 
         final TextView txtEditUserInfo = (TextView)v.findViewById(R.id.txtEditUserInfo);
@@ -122,5 +131,39 @@ public class SettingsFragment extends Fragment
                 }
             }
         });
-    }
+
+
+        final TextView sync = (TextView) v.findViewById(R.id.sync);
+        sync.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view) {
+                List<Location> list = db.selectUnsyncedLocation();
+
+                Settings settings = db.getSettings();
+
+                for(int i = 0; list != null && i < list.size(); i++)
+                {
+                    final Location loc = list.get(i);
+
+                    Ion.with(getActivity())
+                            .load(HttpRequestHelper.host + "/api/0.1/location/")
+                            .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
+                            .setJsonObjectBody(loc.toJSON())
+                            .asJsonObject()
+                            .setCallback(new FutureCallback<JsonObject>() {
+                                @Override
+                                public void onCompleted(Exception e, JsonObject result) {
+                                    db.setDataSynced(loc.getRowid());
+                                }
+                            });
+                }
+
+                int numSyncData = db.countUnsyncedData();
+                String txtSyncData = "You need to sync " + numSyncData + " data";
+
+                tvSyncData.setText(txtSyncData);
+            }
+        });
+    } // onActivityCreated
 }

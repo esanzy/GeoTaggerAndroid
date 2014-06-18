@@ -1,10 +1,13 @@
-package com.msk.geotagger;
+package com.msk.geotagger.utils;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+
+import com.msk.geotagger.model.Location;
+import com.msk.geotagger.model.Settings;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -32,13 +35,13 @@ public class DBAdapter
     	this.context = context;
     }
     
-    public long insertLocation(Location loc, boolean sync)
+    public long insertLocation(Location loc)
     {
     	long result;
     	
     	try
     	{
-    		db = (new DBHelper(context).getWritableDatabase());  
+    		db = (new DBHelper(context).getWritableDatabase());
     		
 	    	ContentValues values = new ContentValues();
 	    	
@@ -76,17 +79,7 @@ public class DBAdapter
 	    	values.put("contactEmail", loc.getContactEmail());
 	    	values.put("contactPhone", loc.getContactPhone());
 	    	values.put("contactWebsite", loc.getContactWebsite());
-
-            int nsync;
-            if(sync)
-            {
-                nsync = 1;
-            }
-            else
-            {
-                nsync = 0;
-            }
-            values.put("sync", nsync);
+            values.put("sync", loc.getSync());
 
 	    	result = db.insert(DB_NAME,null,values);
 	    	
@@ -106,21 +99,45 @@ public class DBAdapter
             }
     	}
     }
-    
+
+    public List<Location> selectAllLocation()
+    {
+        return selectLocations("select * from geo_tagger");
+    }
+
+    public List<Location> selectUnsyncedLocation()
+    {
+        return selectLocations("select * from geo_tagger where sync = 0");
+    }
+
+
+    public Location selectLocation(int rowid)
+    {
+        List<Location> list = selectLocations("select * from geo_tagger where rowid = " + rowid);
+
+        if(list.size() > 0)
+        {
+            return list.get(0);
+        }
+
+        else
+        {
+            return null;
+        }
+    }
+
     /**
      * @since 2014-05-08 이준원
      * @update 2014-05-08 이준원
      * 
      */
-    public List<Location> selectAllLocation()
+    public List<Location> selectLocations(String sql)
     {
     	List<Location> result = new ArrayList<Location>();
     	
     	try
     	{
     		db = (new DBHelper(context).getReadableDatabase());
-    		String sql = "select * from geo_tagger";
-    		
     		Cursor c = db.rawQuery(sql, null);
     		
     		if(c.moveToFirst()) {
@@ -129,6 +146,7 @@ public class DBAdapter
 	    		{
 	    			Location loc = new Location();
 
+                    loc.setRowid(c.getInt(c.getColumnIndex("rowid")));
                     loc.setCreated(new Timestamp(c.getInt(c.getColumnIndex("created"))));
 
 	    			loc.setLatitude(c.getDouble(c.getColumnIndex("latitude")));
@@ -140,7 +158,7 @@ public class DBAdapter
 
                     loc.setYouthType(c.getInt(c.getColumnIndex("youthType")));
                     loc.setCampusType(c.getInt(c.getColumnIndex("campusType")));
-                    loc.setIndigineousType(c.getInt(c.getColumnIndex("indigenousType")));
+                    loc.setIndigenousType(c.getInt(c.getColumnIndex("indigenousType")));
                     loc.setPrisonType(c.getInt(c.getColumnIndex("prisonType")));
                     loc.setProstitutesType(c.getInt(c.getColumnIndex("prostitutesType")));
                     loc.setOrphansType(c.getInt(c.getColumnIndex("orphansType")));
@@ -166,7 +184,9 @@ public class DBAdapter
 	    			loc.setContactEmail(c.getString(c.getColumnIndex("contactEmail")));
 	    			loc.setContactPhone(c.getString(c.getColumnIndex("contactPhone")));
 	    			loc.setContactWebsite(c.getString(c.getColumnIndex("contactWebsite")));
-	    			
+
+                    loc.setSync(c.getInt(c.getColumnIndex("sync")));
+
 	    			result.add(loc);
 	    		} while(c.moveToNext());
 
@@ -242,6 +262,49 @@ public class DBAdapter
         catch(SQLException e)
         {
             return -1;
+        }
+
+        finally
+        {
+            if(db != null && db.isOpen())
+            {
+                db.close();
+            }
+        }
+    }
+
+    public int countUnsyncedData()
+    {
+        String sql = "SELECT COUNT(sync) AS unsynced FROM geo_tagger WHERE sync = 0";
+
+
+
+        db = (new DBHelper(context).getReadableDatabase());
+
+        Cursor c = db.rawQuery(sql, null);
+
+        if(c.moveToFirst())
+        {
+            int count = c.getInt(c.getColumnIndex("unsynced"));
+
+            return count;
+        }
+
+        else
+        {
+            return -1;
+        }
+    }
+
+    public void setDataSynced(int rowid)
+    {
+        String sql = "UPDATE geo_tagger SET sync = 1 WHERE rowid = "+ rowid;
+
+        db = (new DBHelper(context).getWritableDatabase());
+
+        try
+        {
+            db.execSQL(sql);
         }
 
         finally

@@ -1,4 +1,4 @@
-package com.msk.geotagger;
+package com.msk.geotagger.fragments;
 
 
 
@@ -7,8 +7,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.msk.geotagger.utils.DBAdapter;
+import com.msk.geotagger.model.Location;
+import com.msk.geotagger.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,12 +59,22 @@ public class HistoryFragment extends Fragment {
         historyListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         DBAdapter dba = new DBAdapter(getActivity());
-        List<Location> locList = dba.selectAllLocation();
+        final List<Location> locList = dba.selectAllLocation();
 
 
         for(int i = 0; i  < locList.size(); i++)
         {
             historyList.add(locList.get(i).getDesc());
         }
+
+        historyListView.setOnItemClickListener( new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                HistoryItemFragment page = new HistoryItemFragment();
+                page.setRowid(locList.get(i).getRowid());
+
+                getFragmentManager().beginTransaction().replace(R.id.container, page).commit();
+            }
+        });
     }
 }

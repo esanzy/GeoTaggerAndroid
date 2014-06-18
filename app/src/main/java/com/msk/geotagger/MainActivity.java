@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
+import com.msk.geotagger.fragments.HistoryFragment;
+import com.msk.geotagger.fragments.SettingsFragment;
+import com.msk.geotagger.fragments.TagFragment;
 
 
 public class MainActivity extends FragmentActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener

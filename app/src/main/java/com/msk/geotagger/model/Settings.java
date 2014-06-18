@@ -1,4 +1,4 @@
-package com.msk.geotagger;
+package com.msk.geotagger.model;
 
 /**
  * Created by Junwon on 2014-06-01.

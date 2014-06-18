@@ -1,4 +1,4 @@
-package com.msk.geotagger;
+package com.msk.geotagger.utils;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -91,8 +91,7 @@ public class DBHelper extends  SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) 
 	{
-		// TODO Auto-generated method stub
-		String sql_droptable = "DROP TABLE IF EXISTS " + "geo_tagger;";  
+		String sql_droptable = "DROP TABLE IF EXISTS " + "geo_tagger;";
         db.execSQL(sql_droptable);
 
         String sql_droptable2 = "DROP TABLE IF EXISTS settings";
