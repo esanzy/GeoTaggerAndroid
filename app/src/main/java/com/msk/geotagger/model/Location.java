@@ -21,6 +21,7 @@ public class Location
 	private double longitude;
 
 	private String photoId;
+    private String photoRealPath;
 	private String contactEmail;
 	private String contactPhone;
 	private String contactWebsite;
@@ -427,5 +428,13 @@ public class Location
         json.addProperty("contactConfirmed", this.contactConfirmed);
 
         return json;
+    }
+
+    public String getPhotoRealPath() {
+        return photoRealPath;
+    }
+
+    public void setPhotoRealPath(String photoRealPath) {
+        this.photoRealPath = photoRealPath;
     }
 }

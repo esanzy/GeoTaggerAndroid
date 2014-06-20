@@ -15,7 +15,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBHelper extends  SQLiteOpenHelper 
 {
 	private static final String DB_NAME = "geo_tagger.db";
-	private static final int DB_VER = 1;  
+	private static final int DB_VER = 2;
 
 	public DBHelper(Context context) 
 	{
@@ -67,6 +67,7 @@ public class DBHelper extends  SQLiteOpenHelper
                 + ", contactConfirmed integer"
 
                 + ", photoId text"
+                + ", photoRealPath text"
                 + ", contactEmail text"
                 + ", contactPhone text"
                 + ", contactWebsite text" +

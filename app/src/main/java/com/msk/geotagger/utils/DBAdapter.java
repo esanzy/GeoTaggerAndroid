@@ -76,6 +76,8 @@ public class DBAdapter
             values.put("contactConfirmed", loc.getContactConfirmed());
 
 	    	values.put("photoId", loc.getPhotoId());
+            values.put("photoRealPath", loc.getPhotoRealPath());
+
 	    	values.put("contactEmail", loc.getContactEmail());
 	    	values.put("contactPhone", loc.getContactPhone());
 	    	values.put("contactWebsite", loc.getContactWebsite());
@@ -181,6 +183,7 @@ public class DBAdapter
                     loc.setContactConfirmed(c.getInt(c.getColumnIndex("contactConfirmed")));
 
 	    			loc.setPhotoId(c.getString(c.getColumnIndex("photoId")));
+                    loc.setPhotoRealPath(c.getString(c.getColumnIndex("photoRealPath")));
 	    			loc.setContactEmail(c.getString(c.getColumnIndex("contactEmail")));
 	    			loc.setContactPhone(c.getString(c.getColumnIndex("contactPhone")));
 	    			loc.setContactWebsite(c.getString(c.getColumnIndex("contactWebsite")));

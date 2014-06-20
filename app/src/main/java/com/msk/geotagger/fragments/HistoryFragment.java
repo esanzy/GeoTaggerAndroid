@@ -64,7 +64,7 @@ public class HistoryFragment extends Fragment {
 
         for(int i = 0; i  < locList.size(); i++)
         {
-            historyList.add(locList.get(i).getDesc());
+            historyList.add(dba.getSettings().getUsername()+locList.get(i).getCreated());
         }
 
         historyListView.setOnItemClickListener( new AdapterView.OnItemClickListener() {

@@ -1,16 +1,20 @@
 package com.msk.geotagger;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -22,11 +26,13 @@ import android.widget.TextView;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+import com.koushikdutta.ion.ProgressCallback;
 import com.msk.geotagger.model.Location;
 import com.msk.geotagger.model.Settings;
 import com.msk.geotagger.utils.DBAdapter;
 import com.msk.geotagger.utils.FileUtil;
 import com.msk.geotagger.utils.HttpRequestHelper;
+import com.msk.geotagger.utils.Server;
 
 import org.apache.http.HttpResponse;
 
@@ -47,18 +53,35 @@ public class AddActivity extends Activity {
     private DBAdapter dba;
     private Settings settings;
 
-    private String photoFileName;
+    private String photoFileName;           // 글로벌리 유니크한 이름의 임시파일
     private File photoFile;
+    private String imagePath;               // 기계에 저장되는 이미지의 절대경로
+
     private Location loc;
 
     private Bitmap myImageBitmap;
 
+    private ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_add);
 
-        //StrictMode.enableDefaults();
+        myImage = (ImageView) findViewById(R.id.myImage);
+
+        if(savedInstanceState != null)
+        {
+            if(savedInstanceState.containsKey("img")) {
+                myImageBitmap = savedInstanceState.getParcelable("img");
+                if (myImageBitmap != null)
+                    myImage.setImageBitmap(myImageBitmap);
+            }
+        }
+
+
+
 
         dba = new DBAdapter(AddActivity.this);
         settings = dba.getSettings();
@@ -109,7 +132,9 @@ public class AddActivity extends Activity {
         TextView btnCancel = (TextView)findViewById(R.id.btn_cancel);
         TextView btnSave = (TextView)findViewById(R.id.btn_save);
 
-        myImage = (ImageView) findViewById(R.id.myImage);
+
+
+
 
         Intent i = getIntent();
         latitude = i.getDoubleExtra("latitude", 0);
@@ -158,6 +183,17 @@ public class AddActivity extends Activity {
                 finish();
             }
         });
+
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setTitle("Wait...");
+        progressDialog.setMessage("Uploading photo");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+
+
+
 
         /**
          * @since 2014-05-08
@@ -293,10 +329,7 @@ public class AddActivity extends Activity {
                 loc.setLatitude(latitude);
                 loc.setLongitude(longitude);
 
-                loc.setCreated(new Timestamp(new Date().getTime()));
-
-
-
+                loc.setCreated(new Timestamp(System.currentTimeMillis()));
 
 
 				/* http://shstarkr.tistory.com/158 참고 */
@@ -311,16 +344,26 @@ public class AddActivity extends Activity {
                 if(settings.getOffline() == 0 && (mobile.isConnected() || wifi.isConnected()))
                 {
                     //3G 또는 WiFi 에 연결되어 있을 경우
-                    //HttpRequestHelper postHelper = new HttpRequestHelper();
-                    if(photoFile != null)
-                    {
-                        ProgressDialog progressDialog = new ProgressDialog(AddActivity.this);
-                        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                        progressDialog.setMessage("Uploading photo");
-                        progressDialog.setCancelable(false);
-                        //progressDialog.show();
 
-                        Ion.with(AddActivity.this, HttpRequestHelper.host+"/m/locpic/")
+                    /// 파일 업로드 ////
+                    if(myImageBitmap != null)
+                    {
+
+
+                        if(imagePath != null)
+                            loc.setPhotoRealPath(imagePath);
+
+
+
+                        // 임시파일 생성
+                        FileUtil fileUtil = new FileUtil(AddActivity.this);
+                        photoFileName = dba.getSettings().getUsername() + new Timestamp(System.currentTimeMillis()).toString()+".jpg";
+                        photoFile = fileUtil.SaveBitmapToFile(myImageBitmap, photoFileName);
+
+
+                        progressDialog.show();
+
+                        Ion.with(AddActivity.this, Server.host + "/m/locpic/")
                                 .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
                                 .uploadProgressDialog(progressDialog)
                                 .setMultipartParameter("username", settings.getUsername())
@@ -330,57 +373,123 @@ public class AddActivity extends Activity {
                                     @Override
                                     public void onCompleted(Exception e, JsonObject result) {
                                         Log.d("파일업로드", "업로드");
+                                        progressDialog.dismiss();
+
+                                        loc.setPhotoId(photoFileName);
+
+                                        //// 파일 업로드 완료 ////
+                                        photoFile.delete();
+                                        sendLocation();
+
+                                        finish();
                                     }
-                                });
+                                }); // Ion
                     }
 
-                    loc.setPhotoId(photoFileName);
+                    else            // 사진파일이 없을 때
+                    {
+                        sendLocation();
 
-                    new AddActivityTask().execute(loc);
-
-                    loc.setSync(1);
-                    dba.insertLocation(loc);
+                        loc.setSync(1);
+                        dba.insertLocation(loc);
+                        finish();
+                    }
                 }
 
-                else
+                else    // 인터넷이 안될 때
                 {
-                    loc.setSync(0);
-                    dba.insertLocation(loc);
+                    if(myImageBitmap != null)
+                    {
+                        if(imagePath != null)
+                            loc.setPhotoRealPath(imagePath);
+
+                        loc.setSync(0);
+                        dba.insertLocation(loc);
+                    }
+
+                    else
+                    {
+                        loc.setSync(0);
+                        dba.insertLocation(loc);
+                    }
+
+                    finish();
                 }
-
-
-
-                finish();
             }
         });
         // setOnClickListener
     } // onCreate
 
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if(myImageBitmap != null) {
+            outState.putParcelable("img", myImageBitmap);
+        }
+
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        super.onActivityResult(requestCode, resultCode, data);
+
         if(resultCode == RESULT_OK)
         {
-            if(requestCode == 81 || requestCode == 82)
+            if( requestCode == 81 || requestCode == 82 )
             {
                 imageURI = data.getData();
 
+                Cursor cursor = null;
                 try
                 {
-                    myImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
-
-                    myImage.setImageBitmap(myImageBitmap);
-                    FileUtil fileUtil = new FileUtil(AddActivity.this);
-                    photoFileName = dba.getSettings().getUsername() + new Timestamp(new Date().getTime()).toString()+".jpg";
-                    photoFile = fileUtil.SaveBitmapToFile(myImageBitmap, photoFileName);
+                    String[] proj = { MediaStore.Images.Media.DATA };
+                    cursor = AddActivity.this.getContentResolver().query(imageURI,  proj, null, null, null);
+                    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                    cursor.moveToFirst();
+                    imagePath = cursor.getString(column_index);
                 }
-                catch (IOException e)
+
+                finally
                 {
+                    if (cursor != null)
+                    {
+                        cursor.close();
+                    }
+                }
+
+
+                try {
+                    myImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
+                    if( myImageBitmap != null )
+                        myImage.setImageBitmap(myImageBitmap);
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-        }
+            } // else if 82
+
+        } // if RESULT_OK
+    } // onActivityResult
+
+    private void sendLocation()
+    {
+        Ion.with(this)
+                .load(Server.host + "/api/0.1/location/")
+                .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
+                .setJsonObjectBody(loc.toJSON())
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        loc.setSync(1);
+                        dba.insertLocation(loc);
+                    }
+                });
     }
+
 
     private class AddActivityTask extends AsyncTask<Location, Void, HttpResponse>
     {

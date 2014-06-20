@@ -1,5 +1,7 @@
 package com.msk.geotagger.fragments;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -7,11 +9,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.msk.geotagger.R;
 import com.msk.geotagger.model.Location;
 import com.msk.geotagger.utils.DBAdapter;
+
+import java.io.File;
 
 /**
  * Created by junwon on 14. 6. 17.
@@ -78,6 +83,8 @@ public class HistoryItemFragment extends Fragment
         final EditText editText4 = (EditText) v.findViewById(R.id.editText4); // phone
         final EditText editText5 = (EditText) v.findViewById(R.id.editText5); // website
 
+        final ImageView myImage = (ImageView) v.findViewById(R.id.myImage);
+
 
         chkQ1_1.setChecked(checkBool(loc.getEvanType()));
         chkQ1_1.setClickable(false);
@@ -137,6 +144,13 @@ public class HistoryItemFragment extends Fragment
         editText4.setClickable(false);
         editText5.setText(loc.getContactWebsite());
         editText5.setClickable(false);
+
+        File imgFile = new  File(loc.getPhotoRealPath());
+        if(imgFile.exists()){
+            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            myImage.setImageBitmap(myBitmap);
+            myImage.invalidate();
+        }
 
         final RelativeLayout add_footer = (RelativeLayout) v.findViewById(R.id.add_footer);
         add_footer.setVisibility(View.GONE);

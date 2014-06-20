@@ -1,5 +1,8 @@
 package com.msk.geotagger.fragments;
 
+import android.app.ProgressDialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -18,8 +21,11 @@ import com.msk.geotagger.model.Location;
 import com.msk.geotagger.utils.DBAdapter;
 import com.msk.geotagger.R;
 import com.msk.geotagger.model.Settings;
-import com.msk.geotagger.utils.HttpRequestHelper;
+import com.msk.geotagger.utils.FileUtil;
+import com.msk.geotagger.utils.Server;
 
+import java.io.File;
+import java.sql.Timestamp;
 import java.util.List;
 
 
@@ -132,6 +138,14 @@ public class SettingsFragment extends Fragment
             }
         });
 
+        final ProgressDialog progressDialog;
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setTitle("Wait...");
+        progressDialog.setMessage("Uploading photo");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+
 
         final TextView sync = (TextView) v.findViewById(R.id.sync);
         sync.setOnClickListener(new View.OnClickListener()
@@ -140,29 +154,81 @@ public class SettingsFragment extends Fragment
             public void onClick(View view) {
                 List<Location> list = db.selectUnsyncedLocation();
 
-                Settings settings = db.getSettings();
+                final Settings settings = db.getSettings();
 
                 for(int i = 0; list != null && i < list.size(); i++)
                 {
                     final Location loc = list.get(i);
 
-                    Ion.with(getActivity())
-                            .load(HttpRequestHelper.host + "/api/0.1/location/")
-                            .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
-                            .setJsonObjectBody(loc.toJSON())
-                            .asJsonObject()
-                            .setCallback(new FutureCallback<JsonObject>() {
-                                @Override
-                                public void onCompleted(Exception e, JsonObject result) {
-                                    db.setDataSynced(loc.getRowid());
-                                }
-                            });
+                    if(loc.getPhotoRealPath() != null)
+                    {
+                        Bitmap bm = BitmapFactory.decodeFile(loc.getPhotoRealPath());
+
+                        // 임시파일 생성
+                        FileUtil fileUtil = new FileUtil(getActivity());
+                        final String photoFileName = db.getSettings().getUsername() + new Timestamp(System.currentTimeMillis()).toString()+".jpg";
+                        final File photoFile = fileUtil.SaveBitmapToFile(bm, photoFileName);
+
+
+                        progressDialog.show();
+
+                        Ion.with(getActivity(), Server.host + "/m/locpic/")
+                                .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
+                                .uploadProgressDialog(progressDialog)
+                                .setMultipartParameter("username", settings.getUsername())
+                                .setMultipartFile("pic", "image/jpeg", photoFile)
+                                .asJsonObject()
+                                .setCallback(new FutureCallback<JsonObject>() {
+                                    @Override
+                                    public void onCompleted(Exception e, JsonObject result) {
+                                        Log.d("파일업로드", "업로드");
+                                        progressDialog.dismiss();
+
+                                        loc.setPhotoId(photoFileName);
+
+                                        //// 파일 업로드 완료 ////
+                                        photoFile.delete();
+
+
+                                        Ion.with(getActivity())
+                                                .load(Server.host + "/api/0.1/location/")
+                                                .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
+                                                .setJsonObjectBody(loc.toJSON())
+                                                .asJsonObject()
+                                                .setCallback(new FutureCallback<JsonObject>() {
+                                                    @Override
+                                                    public void onCompleted(Exception e, JsonObject result) {
+                                                        db.setDataSynced(loc.getRowid());
+                                                    }
+                                                });
+                                    }
+                                }); // Ion
+                    }
+
+                    else
+                    {
+                        Ion.with(getActivity())
+                                .load(Server.host + "/api/0.1/location/")
+                                .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
+                                .setJsonObjectBody(loc.toJSON())
+                                .asJsonObject()
+                                .setCallback(new FutureCallback<JsonObject>() {
+                                    @Override
+                                    public void onCompleted(Exception e, JsonObject result) {
+                                        db.setDataSynced(loc.getRowid());
+                                    }
+                                });
+                    }
+
+
+
                 }
 
                 int numSyncData = db.countUnsyncedData();
                 String txtSyncData = "You need to sync " + numSyncData + " data";
 
                 tvSyncData.setText(txtSyncData);
+                tvSyncData.invalidate();
             }
         });
     } // onActivityCreated
