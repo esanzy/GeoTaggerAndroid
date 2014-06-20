@@ -1,6 +1,7 @@
 package com.msk.geotagger;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -24,6 +25,7 @@ import com.koushikdutta.ion.Ion;
 import com.msk.geotagger.model.Location;
 import com.msk.geotagger.model.Settings;
 import com.msk.geotagger.utils.DBAdapter;
+import com.msk.geotagger.utils.FileUtil;
 import com.msk.geotagger.utils.HttpRequestHelper;
 
 import org.apache.http.HttpResponse;
@@ -44,6 +46,12 @@ public class AddActivity extends Activity {
 
     private DBAdapter dba;
     private Settings settings;
+
+    private String photoFileName;
+    private File photoFile;
+    private Location loc;
+
+    private Bitmap myImageBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,7 +168,7 @@ public class AddActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                Location loc = new Location();
+                loc = new Location();
 
                 // Question 1
                 if(chkQ1_1.isChecked())
@@ -304,6 +312,30 @@ public class AddActivity extends Activity {
                 {
                     //3G 또는 WiFi 에 연결되어 있을 경우
                     //HttpRequestHelper postHelper = new HttpRequestHelper();
+                    if(photoFile != null)
+                    {
+                        ProgressDialog progressDialog = new ProgressDialog(AddActivity.this);
+                        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                        progressDialog.setMessage("Uploading photo");
+                        progressDialog.setCancelable(false);
+                        //progressDialog.show();
+
+                        Ion.with(AddActivity.this, HttpRequestHelper.host+"/m/locpic/")
+                                .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
+                                .uploadProgressDialog(progressDialog)
+                                .setMultipartParameter("username", settings.getUsername())
+                                .setMultipartFile("pic", "image/jpeg", photoFile)
+                                .asJsonObject()
+                                .setCallback(new FutureCallback<JsonObject>() {
+                                    @Override
+                                    public void onCompleted(Exception e, JsonObject result) {
+                                        Log.d("파일업로드", "업로드");
+                                    }
+                                });
+                    }
+
+                    loc.setPhotoId(photoFileName);
+
                     new AddActivityTask().execute(loc);
 
                     loc.setSync(1);
@@ -327,35 +359,25 @@ public class AddActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        //super.onActivityResult(requestCode, resultCode, data);
-
         if(resultCode == RESULT_OK)
         {
             if(requestCode == 81 || requestCode == 82)
             {
-                Uri currImageURI = data.getData();
+                imageURI = data.getData();
 
-                imageURI = currImageURI;
-            }
-        }
-    }
+                try
+                {
+                    myImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
 
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-
-        if (imageURI != null)
-        {
-
-            try
-            {
-                Bitmap myImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
-                myImage.setImageBitmap(myImageBitmap);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
+                    myImage.setImageBitmap(myImageBitmap);
+                    FileUtil fileUtil = new FileUtil(AddActivity.this);
+                    photoFileName = dba.getSettings().getUsername() + new Timestamp(new Date().getTime()).toString()+".jpg";
+                    photoFile = fileUtil.SaveBitmapToFile(myImageBitmap, photoFileName);
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -366,23 +388,6 @@ public class AddActivity extends Activity {
         @Override
         protected HttpResponse doInBackground(Location... params) {
             HttpRequestHelper helper = new HttpRequestHelper(AddActivity.this);
-
-            if (imageURI != null)
-            {
-                //helper.uploadImage(imageURI);
-
-                Ion.with(AddActivity.this, HttpRequestHelper.host+"/m/locpic")
-                    .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
-                    .setMultipartParameter("username", settings.getUsername())
-                    .setMultipartFile("pic", new File(getRealPathFromURI(imageURI)))
-                    .asJsonObject()
-                    .setCallback(new FutureCallback<JsonObject>() {
-                        @Override
-                        public void onCompleted(Exception e, JsonObject result) {
-                            Log.d("파일업로드", "업로드");
-                        }
-                    });
-            }
 
             return helper.sendLocation(params[0]);
         }
@@ -398,25 +403,4 @@ public class AddActivity extends Activity {
         }
     }
 
-    public String getRealPathFromURI(Uri contentUri)
-    {
-        Cursor cursor = null;
-
-        try
-        {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = this.getContentResolver().query(contentUri,  proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        }
-
-        finally
-        {
-            if (cursor != null)
-            {
-                cursor.close();
-            }
-        }
-    }
 }

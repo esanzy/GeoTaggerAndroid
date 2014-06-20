@@ -44,7 +44,7 @@ public class HttpRequestHelper
     }
 
     //private static final String host = "http://192.237.166.7";
-    public static final String host = "http://172.16.2.241:8001";
+    public static final String host = "http://172.16.3.25:8000";
 
 	public HttpResponse sendLocation(Location loc)
 	{
