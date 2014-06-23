@@ -28,7 +28,7 @@ public class DBHelper extends  SQLiteOpenHelper
 		// TODO Auto-generated method stub
 		String sql = "create table geo_tagger ("
                 + "rowid integer primary key autoincrement"
-                + ", created timestamp default current_timestamp"
+                + ", created integer"
 
                 + ", latitude real"
                 + ", longitude real"

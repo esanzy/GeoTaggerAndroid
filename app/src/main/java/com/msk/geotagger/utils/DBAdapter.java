@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.msk.geotagger.model.Location;
 import com.msk.geotagger.model.Settings;
@@ -83,6 +84,10 @@ public class DBAdapter
 	    	values.put("contactWebsite", loc.getContactWebsite());
             values.put("sync", loc.getSync());
 
+            values.put("created", loc.getCreatedTimestamp().getTime());
+            Log.d("created2", loc.getCreatedTimestamp().toString());
+            Log.d("created time2", ""+loc.getCreatedTimestamp().getTime());
+
 	    	result = db.insert(DB_NAME,null,values);
 	    	
 	    	return result;
@@ -149,7 +154,9 @@ public class DBAdapter
 	    			Location loc = new Location();
 
                     loc.setRowid(c.getInt(c.getColumnIndex("rowid")));
-                    loc.setCreated(new Timestamp(c.getInt(c.getColumnIndex("created"))));
+                    loc.setCreated(new Timestamp(  c.getLong(c.getColumnIndex("created"))));
+                    Log.d("created3", loc.getCreatedTimestamp().toString());
+                    Log.d("created time3", ""+c.getLong(c.getColumnIndex("created")));
 
 	    			loc.setLatitude(c.getDouble(c.getColumnIndex("latitude")));
 	    			loc.setLongitude(c.getDouble(c.getColumnIndex("longitude")));

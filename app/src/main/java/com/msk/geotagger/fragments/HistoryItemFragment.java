@@ -145,11 +145,13 @@ public class HistoryItemFragment extends Fragment
         editText5.setText(loc.getContactWebsite());
         editText5.setClickable(false);
 
-        File imgFile = new  File(loc.getPhotoRealPath());
-        if(imgFile.exists()){
-            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            myImage.setImageBitmap(myBitmap);
-            myImage.invalidate();
+        if(loc.getPhotoRealPath() != null && !"".equals(loc.getPhotoRealPath())) {
+            File imgFile = new File(loc.getPhotoRealPath());
+            if (imgFile.exists()) {
+                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                myImage.setImageBitmap(myBitmap);
+                myImage.invalidate();
+            }
         }
 
         final RelativeLayout add_footer = (RelativeLayout) v.findViewById(R.id.add_footer);

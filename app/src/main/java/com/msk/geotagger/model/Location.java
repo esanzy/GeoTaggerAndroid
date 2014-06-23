@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 /*
  * 
@@ -15,7 +16,7 @@ public class Location
 {
     private int rowid;
     private int sync;
-	private Timestamp created;
+	private Date created;
 	
 	private double latitude;
 	private double longitude;
@@ -53,14 +54,16 @@ public class Location
 
     private String user;
 
-    public Timestamp getCreated()
+    public Date getCreated()
     {
         return created;
     }
 
+    public Timestamp getCreatedTimestamp() { return new Timestamp(created.getTime()); }
+
     public void setCreated(Timestamp created)
     {
-        this.created = created;
+        this.created = new Date(created.getTime());
     }
 
     public double getLatitude()

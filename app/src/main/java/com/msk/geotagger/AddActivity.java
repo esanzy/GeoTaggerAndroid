@@ -1,20 +1,17 @@
 package com.msk.geotagger;
 
 import android.app.Activity;
-import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -26,15 +23,12 @@ import android.widget.TextView;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.koushikdutta.ion.ProgressCallback;
 import com.msk.geotagger.model.Location;
 import com.msk.geotagger.model.Settings;
 import com.msk.geotagger.utils.DBAdapter;
 import com.msk.geotagger.utils.FileUtil;
-import com.msk.geotagger.utils.HttpRequestHelper;
 import com.msk.geotagger.utils.Server;
 
-import org.apache.http.HttpResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -330,7 +324,7 @@ public class AddActivity extends Activity {
                 loc.setLongitude(longitude);
 
                 loc.setCreated(new Timestamp(System.currentTimeMillis()));
-
+                Log.d("created", loc.getCreatedTimestamp().toString());
 
 				/* http://shstarkr.tistory.com/158 참고 */
                 ConnectivityManager cManager;
@@ -344,57 +338,86 @@ public class AddActivity extends Activity {
                 if(settings.getOffline() == 0 && (mobile.isConnected() || wifi.isConnected()))
                 {
                     //3G 또는 WiFi 에 연결되어 있을 경우
+                    // api key check
+                    if( settings.getUsername() == null || "".equals(settings.getUsername().trim()) || settings.getApiKey() == null || "".equals(settings.getApiKey().trim()))
+                    {
+                        // show dialog
 
-                    /// 파일 업로드 ////
-                    if(myImageBitmap != null)
+                        int identifier = getResources().getIdentifier("auth_error", "string", "com.msk.geotagger");
+
+                        String auth_error = "Authentication Error";
+                        if(identifier != 0)
+                        {
+                            auth_error = getResources().getString(identifier);
+                        }
+
+                        identifier = getResources().getIdentifier("apikey_missing", "string", "com.msk.geotagger");
+
+                        String apikey_missing = "Username or Api Key is missing !!";
+
+                        if(identifier != 0)
+                        {
+                            apikey_missing = getResources().getString(identifier);
+                        }
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddActivity.this);
+                        alertDialogBuilder.setTitle(auth_error);
+                        alertDialogBuilder.setMessage(apikey_missing);
+                        alertDialogBuilder.setPositiveButton("확인", dismissListener);
+                        alertDialogBuilder.show();
+                    }
+
+                    else
                     {
 
 
-                        if(imagePath != null)
-                            loc.setPhotoRealPath(imagePath);
+                        /// 파일 업로드 ////
+                        if (myImageBitmap != null)
+                        {
+                            if (imagePath != null)
+                                loc.setPhotoRealPath(imagePath);
 
 
+                            // 임시파일 생성
+                            FileUtil fileUtil = new FileUtil(AddActivity.this);
+                            photoFileName = dba.getSettings().getUsername() + loc.getCreatedTimestamp().toString() + ".jpg";
+                            photoFile = fileUtil.SaveBitmapToFile(myImageBitmap, photoFileName);
 
-                        // 임시파일 생성
-                        FileUtil fileUtil = new FileUtil(AddActivity.this);
-                        photoFileName = dba.getSettings().getUsername() + new Timestamp(System.currentTimeMillis()).toString()+".jpg";
-                        photoFile = fileUtil.SaveBitmapToFile(myImageBitmap, photoFileName);
 
+                            progressDialog.show();
 
-                        progressDialog.show();
+                            Ion.with(AddActivity.this, Server.host + "/m/locpic/")
+                                    .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
+                                    .uploadProgressDialog(progressDialog)
+                                    .setMultipartParameter("username", settings.getUsername())
+                                    .setMultipartFile("pic", "image/jpeg", photoFile)
+                                    .asJsonObject()
+                                    .setCallback(new FutureCallback<JsonObject>() {
+                                        @Override
+                                        public void onCompleted(Exception e, JsonObject result) {
+                                            Log.d("파일업로드", "업로드");
+                                            progressDialog.dismiss();
 
-                        Ion.with(AddActivity.this, Server.host + "/m/locpic/")
-                                .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
-                                .uploadProgressDialog(progressDialog)
-                                .setMultipartParameter("username", settings.getUsername())
-                                .setMultipartFile("pic", "image/jpeg", photoFile)
-                                .asJsonObject()
-                                .setCallback(new FutureCallback<JsonObject>() {
-                                    @Override
-                                    public void onCompleted(Exception e, JsonObject result) {
-                                        Log.d("파일업로드", "업로드");
-                                        progressDialog.dismiss();
+                                            loc.setPhotoId(photoFileName);
 
-                                        loc.setPhotoId(photoFileName);
+                                            //// 파일 업로드 완료 ////
+                                            photoFile.delete();
+                                            sendLocation();
 
-                                        //// 파일 업로드 완료 ////
-                                        photoFile.delete();
-                                        sendLocation();
+                                            finish();
+                                        }
+                                    }); // Ion
+                        }
 
-                                        finish();
-                                    }
-                                }); // Ion
-                    }
+                        else            // 사진파일이 없을 때
+                        {
+                            sendLocation();
 
-                    else            // 사진파일이 없을 때
-                    {
-                        sendLocation();
-
-                        loc.setSync(1);
-                        dba.insertLocation(loc);
-                        finish();
-                    }
-                }
+                            loc.setSync(1);
+                            dba.insertLocation(loc);
+                            finish();
+                        }
+                    } // api 키 관련 if
+                } // 인터넷 접속 관련 if
 
                 else    // 인터넷이 안될 때
                 {
@@ -490,26 +513,10 @@ public class AddActivity extends Activity {
                 });
     }
 
-
-    private class AddActivityTask extends AsyncTask<Location, Void, HttpResponse>
-    {
-
+    private DialogInterface.OnClickListener dismissListener = new DialogInterface.OnClickListener(){
         @Override
-        protected HttpResponse doInBackground(Location... params) {
-            HttpRequestHelper helper = new HttpRequestHelper(AddActivity.this);
-
-            return helper.sendLocation(params[0]);
+        public void onClick(DialogInterface dialogInterface, int i) {
+            dialogInterface.dismiss();
         }
-
-        @Override
-        protected void onPostExecute(HttpResponse httpResponse) {
-            super.onPostExecute(httpResponse);
-
-            if(httpResponse != null)
-            {
-                Log.i("응답", ""+httpResponse.getStatusLine().getStatusCode());
-            }
-        }
-    }
-
+    };
 }

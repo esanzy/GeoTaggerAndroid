@@ -98,6 +98,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:id="@+id/etUsername"
+                    android:enabled="false"
                     android:layout_weight="1" />
             </TableRow>
 
@@ -119,6 +120,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:id="@+id/etApiKey"
+                    android:enabled="false"
                     android:layout_weight="1" />
             </TableRow>
 
