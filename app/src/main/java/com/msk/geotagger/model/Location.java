@@ -400,6 +400,8 @@ public class Location
         json.addProperty("latitude", this.latitude);
         json.addProperty("longitude", this.longitude);
 
+        json.addProperty("created", this.getCreatedTimestamp().toString());
+
         json.addProperty("photoId", this.photoId);
         json.addProperty("contactEmail", this.contactEmail);
         json.addProperty("contactPhone", this.contactPhone);
