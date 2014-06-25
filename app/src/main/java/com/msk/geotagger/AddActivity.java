@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -21,13 +22,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.JsonObject;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
 import com.msk.geotagger.model.Location;
 import com.msk.geotagger.model.Settings;
 import com.msk.geotagger.utils.DBAdapter;
 import com.msk.geotagger.utils.SendDataTask;
-import com.msk.geotagger.utils.Server;
+import com.msk.geotagger.utils.SendPicTask;
 
 
 import org.apache.http.HttpResponse;
@@ -52,7 +51,6 @@ public class AddActivity extends Activity {
     private Settings settings;
 
     private String photoFileName;           // 글로벌리 유니크한 이름의 임시파일
-    private File photoFile;
     private String imagePath;               // 기계에 저장되는 이미지의 절대경로
 
     private Location loc;
@@ -71,22 +69,14 @@ public class AddActivity extends Activity {
 
         if(savedInstanceState != null)
         {
-            if(savedInstanceState.containsKey("img"))
-            {
-
-                myImageBitmap = savedInstanceState.getParcelable("img");
-
-
-                if (myImageBitmap != null)
-                {
-                    myImage.setImageBitmap(myImageBitmap);
-                }
-            }
-
             if(savedInstanceState.containsKey("imagePath"))
             {
                 imagePath = savedInstanceState.getString("imagePath");
+                myImageBitmap = BitmapFactory.decodeFile(imagePath);
+                myImage.setImageBitmap(myImageBitmap);
+
             }
+
         }
 
 
@@ -384,6 +374,8 @@ public class AddActivity extends Activity {
                         /// 파일 업로드 ////
                         if (myImageBitmap != null)
                         {
+                            File photoFile = null;
+
                             if (imagePath != null) {
                                 photoFile = new File(imagePath);
                                 loc.setPhotoRealPath(imagePath);
@@ -393,52 +385,53 @@ public class AddActivity extends Activity {
                             photoFileName = dba.getSettings().getUsername() + loc.getCreatedTimestamp().toString().trim() + ".jpg";
                             final File photoFile2 = new File(photoFile.getParentFile().toString()+photoFileName);
 
+                            int newHeight;
+                            if(myImageBitmap.getHeight() > 400)
+                            {
+                                newHeight = 400;
+                            }
+                            else if(myImageBitmap.getHeight() < myImageBitmap.getWidth())
+                            {
+                                newHeight = 200;
+                            }
+                            else
+                            {
+                                newHeight = myImageBitmap.getHeight();
+                            }
+
+
+
+                            final float densityMultiplier = AddActivity.this.getResources().getDisplayMetrics().density;
+                            int h= (int) (newHeight*densityMultiplier);
+                            int w= (int) (h * myImageBitmap.getWidth()/((double) myImageBitmap.getHeight()));
+
+                            Bitmap photo = Bitmap.createScaledBitmap(myImageBitmap, w, h, true);
+
                             try {
                                 photoFile2.createNewFile();
                                 OutputStream out = new FileOutputStream(photoFile2);
-                                myImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                                photo.compress(Bitmap.CompressFormat.JPEG, 100, out);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
 
-                            // 임시파일 생성
-/*
-                            FileUtil fileUtil = new FileUtil(AddActivity.this);
-                            photoFile = fileUtil.SaveBitmapToFile(myImageBitmap, photoFileName);
-*/
+                            if(photoFile2.exists()) {
 
-                            if(photoFile.exists()) {
+                                JsonObject json = new JsonObject();
+                                json.addProperty("credential", dba.getSettings().getUsername()+":"+dba.getSettings().getApiKey());
+                                json.addProperty("username", dba.getSettings().getUsername());
+                                json.addProperty("filepath", photoFile2.getAbsolutePath());
+
                                 progressDialog.show();
+                                sendPhoto(json);
 
-                                Ion.with(AddActivity.this, Server.host + "/m/locpic/")
-                                        .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
-                                        .uploadProgressDialog(progressDialog)
-                                        .setMultipartParameter("username", settings.getUsername())
-                                        .setMultipartFile("pic", "image/jpeg", photoFile2)
-                                        .asJsonObject()
-                                        .setCallback(new FutureCallback<JsonObject>() {
-                                            @Override
-                                            public void onCompleted(Exception e, JsonObject result) {
-                                                Log.d("파일업로드", "업로드");
-                                                progressDialog.dismiss();
 
-                                                loc.setPhotoId(photoFileName);
-
-                                                //// 파일 업로드 완료 ////
-                                                photoFile2.delete();
-
-                                                sendLocation();
-
-                                                loc.setSync(1);
-                                                dba.insertLocation(loc);
-
-                                                finish();
-                                            }
-                                        }); // Ion
                             }
 
                             else // 사진파일 불러오기 실패
                             {
+                                Log.d("사진 업로드", "사진 불러오기 실패!!");
+
                                 sendLocation();
 
                                 loc.setSync(1);
@@ -486,15 +479,9 @@ public class AddActivity extends Activity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if(myImageBitmap != null) {
-            outState.putParcelable("img", myImageBitmap);
-        }
-
         if(imagePath != null) {
             outState.putString("imagePath", imagePath);
         }
-
-
     }
 
     @Override
@@ -534,6 +521,7 @@ public class AddActivity extends Activity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
             } // else if 82
 
         } // if RESULT_OK
@@ -541,24 +529,14 @@ public class AddActivity extends Activity {
 
     private void sendLocation()
     {
-/*
-        Ion.with(this)
-                .load(Server.host + "/api/0.1/location/")
-                .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
-                .setJsonObjectBody(loc.toJSON())
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        loc.setSync(1);
-                        dba.insertLocation(loc);
-                    }
-                });
-
-*/
         JsonObject json = loc.toJSON();
         json.addProperty("credential", dba.getSettings().getUsername()+":"+dba.getSettings().getApiKey());
         new SendLocationTask().execute(json);
+    }
+
+    private void sendPhoto(JsonObject json)
+    {
+        new SendPhotoTask().execute(json);
     }
 
     private DialogInterface.OnClickListener dismissListener = new DialogInterface.OnClickListener(){
@@ -575,6 +553,24 @@ public class AddActivity extends Activity {
             super.onPostExecute(httpResponse);
 
             AddActivity.this.finish();
+        }
+    }
+
+    private class SendPhotoTask extends SendPicTask
+    {
+        @Override
+        protected void onPostExecute(HttpResponse httpResponse) {
+            super.onPostExecute(httpResponse);
+
+            progressDialog.dismiss();
+
+            loc.setPhotoId(photoFileName);
+            sendLocation();
+
+            loc.setSync(1);
+            dba.insertLocation(loc);
+
+            finish();
         }
     }
 }

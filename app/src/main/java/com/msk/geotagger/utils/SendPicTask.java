@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -16,32 +17,38 @@ import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
 
+
 /**
  * Created by junwon on 14. 6. 25.
  */
-public class SendDataTask extends AsyncTask<JsonObject, Void, HttpResponse>
-{
-    private static String TAG = "위치정보 전송";
+public class SendPicTask extends AsyncTask<JsonObject, Void, HttpResponse> {
+
+    private static String TAG = "사진 전송";
 
     @Override
-    protected HttpResponse doInBackground(JsonObject... locations) {
-
+    protected HttpResponse doInBackground(JsonObject... jsonObjects) {
 
         HttpClient httpClient = getHttpClient();
-        String urlString = Server.host + "/api/0.1/location/";
+        String urlString = Server.host + "/m/locpic/";
 
 
         try {
@@ -49,18 +56,22 @@ public class SendDataTask extends AsyncTask<JsonObject, Void, HttpResponse>
             URI url = new URI(urlString);
             HttpPost httpPost = new HttpPost();
             httpPost.setURI(url);
-            JsonObject json = locations[0];
+            JsonObject json = jsonObjects[0];
             httpPost.setHeader("Content-Type", "application/json");
             httpPost.setHeader("Authorization", "ApiKey "+json.get("credential").getAsString());
 
             json.remove("credential");
 
-            StringEntity params = new StringEntity(json.toString());
-            httpPost.setEntity(params);
+            String filepath = json.get("filepath").getAsString();
+            File file = new File(filepath);
+
+            MultipartEntity entity = new MultipartEntity( HttpMultipartMode.BROWSER_COMPATIBLE );
+            entity.addPart("username", new StringBody(json.get("username").getAsString()));
+            entity.addPart("pic", new FileBody(file));
+
+            httpPost.setEntity(entity);
 
             HttpResponse response = httpClient.execute(httpPost);
-            String responseString = EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
-            Log.d(TAG, responseString);
 
             return response;
 
@@ -86,7 +97,7 @@ public class SendDataTask extends AsyncTask<JsonObject, Void, HttpResponse>
         }
 
         return null;
-    } // doInBackground
+    }
 
     public HttpClient getHttpClient()
     {

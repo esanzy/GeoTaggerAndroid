@@ -26,16 +26,40 @@
         revision="19.1.0"
         sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
     <item
+        dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/httpmime-4.0.1-7246a350e4d4da3157f132bf158520d6bd02687b.jar"
+        jar="/home/junwon/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpmime/4.0.1/326bf4147f100e8a4fdd7f1867a87e969fb10812/httpmime-4.0.1.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="326bf4147f100e8a4fdd7f1867a87e969fb10812"/>
+    <item
         dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/ion-1.2.4-a2dd63a4de354176737ef66974a1a2e976168105.jar"
         jar="/home/junwon/.gradle/caches/modules-2/files-2.1/com.koushikdutta.ion/ion/1.2.4/776baf5cac8eb4145dc0901254122cf956a784e3/ion-1.2.4.jar"
         jumboMode="false"
         revision="19.1.0"
         sha1="776baf5cac8eb4145dc0901254122cf956a784e3"/>
     <item
+        dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/httpcore-4.0.1-0700989254a8514449ca52bafc24f0be9bffdcc0.jar"
+        jar="/home/junwon/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.0.1/e813b8722c387b22e1adccf7914729db09bcb4a9/httpcore-4.0.1.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="e813b8722c387b22e1adccf7914729db09bcb4a9"/>
+    <item
+        dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/commons-fileupload-1.2.1-86469007b19bdf81713864de55a840804c5b21f0.jar"
+        jar="/home/junwon/.gradle/caches/modules-2/files-2.1/commons-fileupload/commons-fileupload/1.2.1/384faa82e193d4e4b0546059ca09572654bc3970/commons-fileupload-1.2.1.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="384faa82e193d4e4b0546059ca09572654bc3970"/>
+    <item
         dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/androidasync-1.2.4-40c5acf3c2218917a65ed6b656d2d35ebc7037ec.jar"
         jar="/home/junwon/.gradle/caches/modules-2/files-2.1/com.koushikdutta.async/androidasync/1.2.4/8dc7111050ee5f13a54b1206d47fee856159b2aa/androidasync-1.2.4.jar"
         jumboMode="false"
         revision="19.1.0"
         sha1="8dc7111050ee5f13a54b1206d47fee856159b2aa"/>
+    <item
+        dex="/home/junwon/Projects/Android/GeoTagger/app/build/intermediates/pre-dexed/debug/apache-mime4j-0.6-34a2e2a41f69206472fc5c2c22ee1e77176685ae.jar"
+        jar="/home/junwon/.gradle/caches/modules-2/files-2.1/org.apache.james/apache-mime4j/0.6/945007627e8d12275d755081a9e609c018e1210d/apache-mime4j-0.6.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="945007627e8d12275d755081a9e609c018e1210d"/>
 
 </pre-dex-items>

@@ -7,14 +7,21 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 19
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.2"
     }
     buildTypes {
         release {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
     }
 }
 
@@ -24,4 +31,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.koushikdutta.ion:ion:1.2.4'
+    compile 'commons-fileupload:commons-fileupload:1.2.1'
+    compile 'org.apache.httpcomponents:httpclient:4.0.1'
+    compile 'org.apache.httpcomponents:httpmime:4.0.1'
 }
