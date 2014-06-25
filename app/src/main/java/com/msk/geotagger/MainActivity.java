@@ -23,32 +23,37 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     private double lon;
 
 
+    private TagFragment tagFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        tagFragment = new TagFragment();
+
+
+
         // 위치정보 불러오기
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
 
+
         if (savedInstanceState == null) {
-            new Handler().postDelayed(new Runnable()
-            {
+            new Handler().post(new Runnable() {
                 @Override
-                public void run()
-                {
-                    TagFragment tagFragment = new TagFragment();
+                public void run() {
                     tagFragment.setLatitude(lat);
                     tagFragment.setLongitude(lon);
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.container, tagFragment)
                             .commit();
                 }
-            }, 200);
-
+            });
         }
+
+
 
 
 
@@ -108,6 +113,8 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
         Location location = mLocationClient.getLastLocation();
         lat = location.getLatitude();
         lon = location.getLongitude();
+
+        tagFragment.setLocation(lat, lon);
     }
 
     @Override

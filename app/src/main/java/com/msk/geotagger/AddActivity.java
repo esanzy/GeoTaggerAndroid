@@ -26,14 +26,18 @@ import com.koushikdutta.ion.Ion;
 import com.msk.geotagger.model.Location;
 import com.msk.geotagger.model.Settings;
 import com.msk.geotagger.utils.DBAdapter;
-import com.msk.geotagger.utils.FileUtil;
+import com.msk.geotagger.utils.SendDataTask;
 import com.msk.geotagger.utils.Server;
 
 
+import org.apache.http.HttpResponse;
+
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Timestamp;
-import java.util.Date;
+
 
 
 public class AddActivity extends Activity {
@@ -67,14 +71,23 @@ public class AddActivity extends Activity {
 
         if(savedInstanceState != null)
         {
-            if(savedInstanceState.containsKey("img")) {
+            if(savedInstanceState.containsKey("img"))
+            {
+
                 myImageBitmap = savedInstanceState.getParcelable("img");
+
+
                 if (myImageBitmap != null)
+                {
                     myImage.setImageBitmap(myImageBitmap);
+                }
+            }
+
+            if(savedInstanceState.containsKey("imagePath"))
+            {
+                imagePath = savedInstanceState.getString("imagePath");
             }
         }
-
-
 
 
         dba = new DBAdapter(AddActivity.this);
@@ -366,46 +379,71 @@ public class AddActivity extends Activity {
                         alertDialogBuilder.show();
                     }
 
-                    else
+                    else // 설정에 username 항목과 api key 항목이 저장되어 있을 경우
                     {
-
-
                         /// 파일 업로드 ////
                         if (myImageBitmap != null)
                         {
-                            if (imagePath != null)
+                            if (imagePath != null) {
+                                photoFile = new File(imagePath);
                                 loc.setPhotoRealPath(imagePath);
+                            }
 
+
+                            photoFileName = dba.getSettings().getUsername() + loc.getCreatedTimestamp().toString().trim() + ".jpg";
+                            final File photoFile2 = new File(photoFile.getParentFile().toString()+photoFileName);
+
+                            try {
+                                photoFile2.createNewFile();
+                                OutputStream out = new FileOutputStream(photoFile2);
+                                myImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
 
                             // 임시파일 생성
+/*
                             FileUtil fileUtil = new FileUtil(AddActivity.this);
-                            photoFileName = dba.getSettings().getUsername() + loc.getCreatedTimestamp().toString() + ".jpg";
                             photoFile = fileUtil.SaveBitmapToFile(myImageBitmap, photoFileName);
+*/
 
+                            if(photoFile.exists()) {
+                                progressDialog.show();
 
-                            progressDialog.show();
+                                Ion.with(AddActivity.this, Server.host + "/m/locpic/")
+                                        .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
+                                        .uploadProgressDialog(progressDialog)
+                                        .setMultipartParameter("username", settings.getUsername())
+                                        .setMultipartFile("pic", "image/jpeg", photoFile2)
+                                        .asJsonObject()
+                                        .setCallback(new FutureCallback<JsonObject>() {
+                                            @Override
+                                            public void onCompleted(Exception e, JsonObject result) {
+                                                Log.d("파일업로드", "업로드");
+                                                progressDialog.dismiss();
 
-                            Ion.with(AddActivity.this, Server.host + "/m/locpic/")
-                                    .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
-                                    .uploadProgressDialog(progressDialog)
-                                    .setMultipartParameter("username", settings.getUsername())
-                                    .setMultipartFile("pic", "image/jpeg", photoFile)
-                                    .asJsonObject()
-                                    .setCallback(new FutureCallback<JsonObject>() {
-                                        @Override
-                                        public void onCompleted(Exception e, JsonObject result) {
-                                            Log.d("파일업로드", "업로드");
-                                            progressDialog.dismiss();
+                                                loc.setPhotoId(photoFileName);
 
-                                            loc.setPhotoId(photoFileName);
+                                                //// 파일 업로드 완료 ////
+                                                photoFile2.delete();
 
-                                            //// 파일 업로드 완료 ////
-                                            photoFile.delete();
-                                            sendLocation();
+                                                sendLocation();
 
-                                            finish();
-                                        }
-                                    }); // Ion
+                                                loc.setSync(1);
+                                                dba.insertLocation(loc);
+
+                                                finish();
+                                            }
+                                        }); // Ion
+                            }
+
+                            else // 사진파일 불러오기 실패
+                            {
+                                sendLocation();
+
+                                loc.setSync(1);
+                                dba.insertLocation(loc);
+                            }
                         }
 
                         else            // 사진파일이 없을 때
@@ -450,6 +488,10 @@ public class AddActivity extends Activity {
 
         if(myImageBitmap != null) {
             outState.putParcelable("img", myImageBitmap);
+        }
+
+        if(imagePath != null) {
+            outState.putString("imagePath", imagePath);
         }
 
 
@@ -499,6 +541,7 @@ public class AddActivity extends Activity {
 
     private void sendLocation()
     {
+/*
         Ion.with(this)
                 .load(Server.host + "/api/0.1/location/")
                 .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
@@ -511,6 +554,11 @@ public class AddActivity extends Activity {
                         dba.insertLocation(loc);
                     }
                 });
+
+*/
+        JsonObject json = loc.toJSON();
+        json.addProperty("credential", dba.getSettings().getUsername()+":"+dba.getSettings().getApiKey());
+        new SendLocationTask().execute(json);
     }
 
     private DialogInterface.OnClickListener dismissListener = new DialogInterface.OnClickListener(){
@@ -519,4 +567,14 @@ public class AddActivity extends Activity {
             dialogInterface.dismiss();
         }
     };
+
+    private class SendLocationTask extends SendDataTask
+    {
+        @Override
+        protected void onPostExecute(HttpResponse httpResponse) {
+            super.onPostExecute(httpResponse);
+
+            AddActivity.this.finish();
+        }
+    }
 }

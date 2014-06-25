@@ -4,10 +4,14 @@ package com.msk.geotagger.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 
 import com.msk.geotagger.AddActivity;
@@ -22,6 +26,8 @@ public class TagFragment extends Fragment
 {
     private double latitude;
     private double longitude;
+
+    private WebView map;
 
     public TagFragment()
     {
@@ -53,7 +59,13 @@ public class TagFragment extends Fragment
             }
         });
 
-        getFragmentManager().beginTransaction().add(R.id.map_canvas, new MapFragment());
+
+        map = (WebView) v.findViewById(R.id.map);
+
+        map.getSettings().setJavaScriptEnabled(true);
+        map.loadUrl("file:///android_asset/map.html");
+        map.loadUrl("javascript:setLatLng(" + latitude + "," + longitude + ");");
+        map.invalidate();
     }
 
     public void setLatitude(double latitude)
@@ -64,5 +76,13 @@ public class TagFragment extends Fragment
     public void setLongitude(double longitude)
     {
         this.longitude = longitude;
+    }
+
+    public void setLocation(double lat, double lng)
+    {
+        this.latitude = lat;
+        this.longitude = lng;
+
+        //map.loadUrl("javascript:setLatLng(" + latitude + "," + longitude + ");");
     }
 }

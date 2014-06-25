@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Map marker</title>
+
+    <style>
+        html, body
+        {
+            height: 100%;
+            margin: 0px;
+            padding: 0px
+        }
+
+
+        #map-canvas
+        {
+
+            width:100%;
+            height: 100%;
+
+            z-index:1;
+        }
+    </style>
+
+
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyAuvnD4WuYWb50K27NmHhEgMvDyUXtbXWA&sensor=true"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script>
+        var lat;
+        var lng;
+        var map;
+
+        function setLatLng(latitude, longitude)
+        {
+            //lat = latitude;
+            //lng = longitude;
+
+            var myLatLng = new google.maps.LatLng(latitude, longitude);
+
+
+
+            map.panTo(myLatLng);
+            setMarkers(myLatLng);
+        }
+
+        function initialize()
+        {
+
+            var myLatLng = new google.maps.LatLng(33.65, 65.36);
+            var mapOptions;
+
+            var mapOptions = {
+                zoom: 5,
+                center: myLatLng,
+                mapTypeId : google.maps.MapTypeId.ROADMAP
+            };
+
+            map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        }
+
+        function setMarkers(loc) {
+            var marker = new google.maps.Marker({
+              position: loc,
+              map: map
+             });
+        }
+	</script>
+	
+	
+  </head>
+  <body onload="initialize()">
+    <div id="map-canvas"></div>
+  </body>
+</html>

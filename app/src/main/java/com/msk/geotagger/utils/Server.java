@@ -6,8 +6,7 @@ package com.msk.geotagger.utils;
 public class Server
 {
     public static final String host_production = "https://95.85.46.232";
-    public static final String host_test = "http://172.16.3.53:8000";
     public static final String host_4k = "http://192.237.166.7";
-    public static final String host = host_test;
+    public static final String host = host_production;
 
 }

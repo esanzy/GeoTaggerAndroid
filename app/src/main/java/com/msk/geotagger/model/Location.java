@@ -403,6 +403,8 @@ public class Location
         json.addProperty("created", this.getCreatedTimestamp().toString());
 
         json.addProperty("photoId", this.photoId);
+        //json.addProperty("photoRealPath", this.photoRealPath);
+
         json.addProperty("contactEmail", this.contactEmail);
         json.addProperty("contactPhone", this.contactPhone);
         json.addProperty("contactWebsite", this.contactWebsite);
