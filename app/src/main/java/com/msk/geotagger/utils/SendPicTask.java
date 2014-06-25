@@ -5,11 +5,14 @@ import android.util.Log;
 
 import com.google.gson.JsonObject;
 
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -35,6 +38,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
+import java.util.Enumeration;
 
 
 /**
@@ -57,9 +61,7 @@ public class SendPicTask extends AsyncTask<JsonObject, Void, HttpResponse> {
             HttpPost httpPost = new HttpPost();
             httpPost.setURI(url);
             JsonObject json = jsonObjects[0];
-            httpPost.setHeader("Content-Type", "application/json");
             httpPost.setHeader("Authorization", "ApiKey "+json.get("credential").getAsString());
-
             json.remove("credential");
 
             String filepath = json.get("filepath").getAsString();
@@ -69,9 +71,21 @@ public class SendPicTask extends AsyncTask<JsonObject, Void, HttpResponse> {
             entity.addPart("username", new StringBody(json.get("username").getAsString()));
             entity.addPart("pic", new FileBody(file));
 
+            Log.d("요청", httpPost.getMethod());
+
+            Header[] headers = httpPost.getAllHeaders();
+            for(int i = 0; i < headers.length; i++)
+            {
+                Log.d("요청", headers[i].getName()+ " : " +headers[i].getValue());
+            }
+
+
             httpPost.setEntity(entity);
 
-            HttpResponse response = httpClient.execute(httpPost);
+
+            HttpResponse response = httpClient.execute(httpPost, new PhotoUploadResponseHandler());
+
+            //Log.d("결과", "" + response.getStatusLine().getStatusCode());
 
             return response;
 
@@ -125,5 +139,20 @@ public class SendPicTask extends AsyncTask<JsonObject, Void, HttpResponse> {
         } catch (Exception e) {
             return new DefaultHttpClient();
         }
+    }
+
+    private class PhotoUploadResponseHandler implements ResponseHandler<HttpResponse> {
+
+        @Override
+        public HttpResponse handleResponse(HttpResponse response)
+                throws ClientProtocolException, IOException {
+
+            HttpEntity r_entity = response.getEntity();
+            String responseString = EntityUtils.toString(r_entity);
+            Log.d("UPLOAD", responseString);
+
+            return null;
+        }
+
     }
 }
