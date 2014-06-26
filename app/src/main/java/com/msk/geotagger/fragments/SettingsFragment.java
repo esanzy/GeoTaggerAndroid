@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,22 +16,32 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.gson.JsonObject;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
 import com.msk.geotagger.model.Location;
 import com.msk.geotagger.utils.DBAdapter;
 import com.msk.geotagger.R;
 import com.msk.geotagger.model.Settings;
-import com.msk.geotagger.utils.FileUtil;
-import com.msk.geotagger.utils.Server;
+import com.msk.geotagger.utils.SendDataTask;
+import com.msk.geotagger.utils.SendPicTask;
 
+import org.apache.http.HttpResponse;
 import java.io.File;
-import java.sql.Timestamp;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 
 public class SettingsFragment extends Fragment
 {
+
+    private File tmpFile;
+    private ProgressDialog progressDialog;
+    private List<Location> list;
+    private int i;
+    private String photoFileName;
+    private DBAdapter db;
+    private boolean inBlockMode = false;
+    private TextView tvSyncData;
 
     public SettingsFragment()
     {
@@ -50,19 +61,21 @@ public class SettingsFragment extends Fragment
 
         View v = getView();
 
-        final DBAdapter db = new DBAdapter(getActivity());
+        db = new DBAdapter(getActivity());
         Settings settings = db.getSettings();
 
         final CheckBox chkOffline = (CheckBox)v.findViewById(R.id.chkOffline);
 
-        if(settings.getOffline() == 0)
-        {
-            chkOffline.setChecked(false);
-        }
-        else
-        {
-            chkOffline.setChecked(true);
-        }
+
+
+
+
+        if(settings.getOffline() == 0) { chkOffline.setChecked(false); }
+
+        else { chkOffline.setChecked(true); }
+
+
+
 
         chkOffline.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
@@ -90,6 +103,8 @@ public class SettingsFragment extends Fragment
         final EditText etUsername = (EditText)v.findViewById(R.id.etUsername);
         final EditText etApiKey = (EditText)v.findViewById(R.id.etApiKey);
 
+
+
         if(settings.getUsername() != null)
         {
             etUsername.setText(settings.getUsername());
@@ -97,6 +112,9 @@ public class SettingsFragment extends Fragment
         }
 
         Log.d("환경설정", ""+settings.getUsername());
+
+
+
 
         if(settings.getApiKey() != null)
         {
@@ -106,11 +124,21 @@ public class SettingsFragment extends Fragment
 
         Log.d("환경설정", ""+settings.getApiKey());
 
+
+
+
         int numSyncData = db.countUnsyncedData();
         String txtSyncData = "You need to sync " + numSyncData + " data";
 
-        final TextView tvSyncData = (TextView)v.findViewById(R.id.txtSyncData);
+
+
+
+        tvSyncData = (TextView)v.findViewById(R.id.txtSyncData);
         tvSyncData.setText(txtSyncData);
+
+
+
+
 
         final TextView txtEditUserInfo = (TextView)v.findViewById(R.id.txtEditUserInfo);
         txtEditUserInfo.setOnClickListener(new View.OnClickListener()
@@ -138,7 +166,7 @@ public class SettingsFragment extends Fragment
             }
         });
 
-        final ProgressDialog progressDialog;
+
         progressDialog = new ProgressDialog(getActivity());
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setTitle("Wait...");
@@ -152,84 +180,134 @@ public class SettingsFragment extends Fragment
         {
             @Override
             public void onClick(View view) {
-                List<Location> list = db.selectUnsyncedLocation();
+                list = db.selectUnsyncedLocation();
 
-                final Settings settings = db.getSettings();
 
-                for(int i = 0; list != null && i < list.size(); i++)
-                {
+                for( int i = 0; i < list.size(); i++ ) {
+                    progressDialog.show();
+
                     final Location loc = list.get(i);
 
-                    if(loc.getPhotoRealPath() != null)
+                    String imagePath = loc.getPhotoRealPath();
+
+                    // 사진이 있는 경우
+                    if (imagePath != null)
                     {
-                        Bitmap bm = BitmapFactory.decodeFile(loc.getPhotoRealPath());
+                        Bitmap bm = BitmapFactory.decodeFile(imagePath);
 
                         // 임시파일 생성
-                        FileUtil fileUtil = new FileUtil(getActivity());
-                        final String photoFileName = db.getSettings().getUsername() + new Timestamp(System.currentTimeMillis()).toString()+".jpg";
-                        final File photoFile = fileUtil.SaveBitmapToFile(bm, photoFileName);
+                        photoFileName = db.getSettings().getUsername() + "_" + Long.toString(loc.getCreatedTimestamp().getTime()) + ".jpg";
+                        File dcim = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+                        File saveDir = new File(dcim.getPath() + "/geotagger");
+                        saveDir.mkdirs();
+                        tmpFile = new File(saveDir.getPath() + "/" + photoFileName);
+
+                        try {
+                            if (tmpFile.exists() || tmpFile.createNewFile()) {
+                                OutputStream out = new FileOutputStream(tmpFile);
+                                bm.compress(Bitmap.CompressFormat.JPEG, 100, out);
+
+                                JsonObject json = new JsonObject();
+                                json.addProperty("credential", db.getSettings().getUsername() + ":" + db.getSettings().getApiKey());
+                                json.addProperty("username", db.getSettings().getUsername());
+                                json.addProperty("filepath", tmpFile.getAbsolutePath());
 
 
-                        progressDialog.show();
+                                sendPhoto(json , loc);
+                            }
 
-                        Ion.with(getActivity(), Server.host + "/m/locpic/")
-                                .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
-                                .uploadProgressDialog(progressDialog)
-                                .setMultipartParameter("username", settings.getUsername())
-                                .setMultipartFile("pic", "image/jpeg", photoFile)
-                                .asJsonObject()
-                                .setCallback(new FutureCallback<JsonObject>() {
-                                    @Override
-                                    public void onCompleted(Exception e, JsonObject result) {
-                                        Log.d("파일업로드", "업로드");
-                                        progressDialog.dismiss();
+                            // 사진파일 불러오기 실패
+                            else
+                            {
+                                // TODO 에러 다이어얼로그 출력
+                                break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
 
-                                        loc.setPhotoId(photoFileName);
-
-                                        //// 파일 업로드 완료 ////
-                                        photoFile.delete();
-
-
-                                        Ion.with(getActivity())
-                                                .load(Server.host + "/api/0.1/location/")
-                                                .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
-                                                .setJsonObjectBody(loc.toJSON())
-                                                .asJsonObject()
-                                                .setCallback(new FutureCallback<JsonObject>() {
-                                                    @Override
-                                                    public void onCompleted(Exception e, JsonObject result) {
-                                                        db.setDataSynced(loc.getRowid());
-                                                    }
-                                                });
-                                    }
-                                }); // Ion
                     }
 
+                    // 사진이 없는 경우
                     else
                     {
-                        Ion.with(getActivity())
-                                .load(Server.host + "/api/0.1/location/")
-                                .setHeader("Authorization", "ApiKey " + settings.getUsername() + ":" + settings.getApiKey())
-                                .setJsonObjectBody(loc.toJSON())
-                                .asJsonObject()
-                                .setCallback(new FutureCallback<JsonObject>() {
-                                    @Override
-                                    public void onCompleted(Exception e, JsonObject result) {
-                                        db.setDataSynced(loc.getRowid());
-                                    }
-                                });
+                        sendLocation(loc);
                     }
-
-
-
                 }
-
-                int numSyncData = db.countUnsyncedData();
-                String txtSyncData = "You need to sync " + numSyncData + " data";
-
-                tvSyncData.setText(txtSyncData);
-                tvSyncData.invalidate();
-            }
-        });
+            } // onClick
+        }); // setOnClickListener
     } // onActivityCreated
+
+
+
+    private void sendPhoto(JsonObject json, Location loc)
+    {
+        SendPhotoTask task = new SendPhotoTask();
+        task.setLoc(loc);
+        task.execute(json);
+    }
+
+    private class SendPhotoTask extends SendPicTask
+    {
+        private Location loc;
+
+        protected void setLoc(Location loc)
+        {
+            this.loc = loc;
+        }
+
+        @Override
+        protected void onPostExecute(HttpResponse httpResponse) {
+            super.onPostExecute(httpResponse);
+
+
+
+            loc.setPhotoId(photoFileName);
+            tmpFile.delete();
+
+
+            sendLocation(loc);
+        }
+    }
+
+
+
+
+    private void sendLocation(Location loc)
+    {
+        JsonObject json = loc.toJSON();
+        json.addProperty("credential", db.getSettings().getUsername()+":"+db.getSettings().getApiKey());
+
+        SendLocationTask task = new SendLocationTask();
+        task.setLoc(loc);
+        task.execute(json);
+    }
+
+
+    private class SendLocationTask extends SendDataTask
+    {
+        private Location loc;
+
+        protected void setLoc(Location loc)
+        {
+            this.loc = loc;
+        }
+
+        @Override
+        protected void onPostExecute(HttpResponse httpResponse) {
+
+            db.setDataSynced(loc.getRowid());
+
+            /// TODO 동기화 갯수 초기화
+            int numSyncData = db.countUnsyncedData();
+            String txtSyncData = "You need to sync " + numSyncData + " data";
+
+            tvSyncData.setText(txtSyncData);
+            tvSyncData.invalidate();
+
+            progressDialog.dismiss();
+
+            super.onPostExecute(httpResponse);
+        }
+    }
 }

@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
+import com.msk.geotagger.model.Location;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -86,7 +87,7 @@ public class SendPicTask extends AsyncTask<JsonObject, Void, HttpResponse> {
             HttpResponse response = httpClient.execute(httpPost, new PhotoUploadResponseHandler());
 
             //Log.d("결과", "" + response.getStatusLine().getStatusCode());
-
+            //JsonObject loc = json.get("loc").getAsJsonObject();
             return response;
 
 
