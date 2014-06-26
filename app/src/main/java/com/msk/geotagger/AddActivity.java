@@ -13,12 +13,16 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.gson.JsonObject;
@@ -52,10 +56,11 @@ public class AddActivity extends Activity {
 
     private String photoFileName;           // 글로벌리 유니크한 이름의 임시파일
     private String imagePath;               // 기계에 저장되는 이미지의 절대경로
+    private File tmpFile;
 
     private Location loc;
 
-    private Bitmap myImageBitmap;
+    //private Bitmap myImageBitmap;
 
     private ProgressDialog progressDialog;
 
@@ -72,11 +77,11 @@ public class AddActivity extends Activity {
             if(savedInstanceState.containsKey("imagePath"))
             {
                 imagePath = savedInstanceState.getString("imagePath");
-                myImageBitmap = BitmapFactory.decodeFile(imagePath);
-                myImage.setImageBitmap(myImageBitmap);
+                imageURI = Uri.fromFile(new File(imagePath));
+                myImage.setImageURI(imageURI);
 
+                Log.d("이미지 파일 경로", imagePath);
             }
-
         }
 
 
@@ -113,11 +118,25 @@ public class AddActivity extends Activity {
         final CheckBox chkQ2_17 = (CheckBox)findViewById(R.id.chk_q2_17); // Maintenance / Construction
         final CheckBox chkQ2_18 = (CheckBox)findViewById(R.id.chk_q2_18); // Research
 
+        View.OnFocusChangeListener keyboardDissmissListener = new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if(!hasFocus)
+                {
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+            }
+        };
+
+
+
         // 질문 3
         final EditText editText1 = (EditText)findViewById(R.id.editText1); // description
-
+        editText1.setOnFocusChangeListener(keyboardDissmissListener);
         // 질문 4
         final EditText editText2 = (EditText)findViewById(R.id.EditText2); // keywords (comma)
+        editText2.setOnFocusChangeListener(keyboardDissmissListener);
 
         // 질문 5 - 정보 수집 동의
         final CheckBox chkQ5 = (CheckBox)findViewById(R.id.chk_q5);
@@ -126,10 +145,23 @@ public class AddActivity extends Activity {
         final EditText editText4 = (EditText)findViewById(R.id.editText4); // phone
         final EditText editText5 = (EditText)findViewById(R.id.editText5); // website
 
+        editText3.setOnFocusChangeListener(keyboardDissmissListener);
+        editText4.setOnFocusChangeListener(keyboardDissmissListener);
+        editText5.setOnFocusChangeListener(keyboardDissmissListener);
+
         TextView btnCancel = (TextView)findViewById(R.id.btn_cancel);
         TextView btnSave = (TextView)findViewById(R.id.btn_save);
 
+        final LinearLayout form = (LinearLayout) findViewById(R.id.form);
+        form.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
+                return false;
+            }
+        });
 
 
 
@@ -338,9 +370,10 @@ public class AddActivity extends Activity {
                 mobile = cManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
                 wifi = cManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
+                //3G 또는 WiFi 에 연결되어 있을 경우
                 if(settings.getOffline() == 0 && (mobile.isConnected() || wifi.isConnected()))
                 {
-                    //3G 또는 WiFi 에 연결되어 있을 경우
+
                     // api key check
                     if( settings.getUsername() == null || "".equals(settings.getUsername().trim()) || settings.getApiKey() == null || "".equals(settings.getApiKey().trim()))
                     {
@@ -369,77 +402,62 @@ public class AddActivity extends Activity {
                         alertDialogBuilder.show();
                     }
 
-                    else // 설정에 username 항목과 api key 항목이 저장되어 있을 경우
+                    // 설정에 username 항목과 api key 항목이 저장되어 있을 경우
+                    else
                     {
-                        /// 파일 업로드 ////
-                        if (myImageBitmap != null)
+
+                        if (imageURI != null)
                         {
-                            File photoFile = null;
+                            Bitmap myImageBitmap = null;
 
-                            if (imagePath != null) {
-                                photoFile = new File(imagePath);
+                            if ( imagePath != null ) {
+                                Log.d("사진 전송", "URI를 이용해 사진 정보 전송");
+
                                 loc.setPhotoRealPath(imagePath);
+                                myImageBitmap = BitmapFactory.decodeFile(imagePath);//MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
+
+                                photoFileName = dba.getSettings().getUsername() + "_" + Long.toString(loc.getCreatedTimestamp().getTime()) + ".jpg";
+                                photoFileName.replaceAll(" ", "_");
+
+                                Log.d("저장 파일 이름", photoFileName);
+
+                                File dcim = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+                                File saveDir = new File(dcim.getPath() + "/geotagger");
+                                saveDir.mkdirs();
+                                tmpFile = new File(saveDir.getPath() + "/" + photoFileName);
+
+                                try {
+                                    if(tmpFile.exists() || tmpFile.createNewFile()) {
+                                        OutputStream out = new FileOutputStream(tmpFile);
+                                        myImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+
+                                        JsonObject json = new JsonObject();
+                                        json.addProperty("credential", dba.getSettings().getUsername()+":"+dba.getSettings().getApiKey());
+                                        json.addProperty("username", dba.getSettings().getUsername());
+                                        json.addProperty("filepath", tmpFile.getAbsolutePath());
+
+                                        progressDialog.show();
+                                        sendPhoto(json);
+                                    }
+
+                                    else // 사진파일 불러오기 실패
+                                    {
+                                        Log.d("사진 업로드", "사진 불러오기 실패!!");
+
+                                        sendLocation();
+
+                                        loc.setSync(1);
+                                        dba.insertLocation(loc);
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
+                        } // if ( imageURI != null )
 
 
-                            photoFileName = dba.getSettings().getUsername() + loc.getCreatedTimestamp().toString().trim() + ".jpg";
-                            final File photoFile2 = new File(photoFile.getParentFile().toString()+photoFileName);
-
-                            int newHeight;
-                            if(myImageBitmap.getHeight() > 400)
-                            {
-                                newHeight = 400;
-                            }
-                            else if(myImageBitmap.getHeight() < myImageBitmap.getWidth())
-                            {
-                                newHeight = 200;
-                            }
-                            else
-                            {
-                                newHeight = myImageBitmap.getHeight();
-                            }
-
-
-
-                            final float densityMultiplier = AddActivity.this.getResources().getDisplayMetrics().density;
-                            int h= (int) (newHeight*densityMultiplier);
-                            int w= (int) (h * myImageBitmap.getWidth()/((double) myImageBitmap.getHeight()));
-
-                            Bitmap photo = Bitmap.createScaledBitmap(myImageBitmap, w, h, true);
-
-                            try {
-                                photoFile2.createNewFile();
-                                OutputStream out = new FileOutputStream(photoFile2);
-                                photo.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
-                            if(photoFile2.exists()) {
-
-                                JsonObject json = new JsonObject();
-                                json.addProperty("credential", dba.getSettings().getUsername()+":"+dba.getSettings().getApiKey());
-                                json.addProperty("username", dba.getSettings().getUsername());
-                                json.addProperty("filepath", photoFile2.getAbsolutePath());
-
-                                progressDialog.show();
-                                sendPhoto(json);
-
-
-                            }
-
-                            else // 사진파일 불러오기 실패
-                            {
-                                Log.d("사진 업로드", "사진 불러오기 실패!!");
-
-                                sendLocation();
-
-                                loc.setSync(1);
-                                dba.insertLocation(loc);
-                            }
-                        }
-
-                        else            // 사진파일이 없을 때
+                        // 사진파일이 없을 때
+                        else
                         {
                             sendLocation();
 
@@ -450,22 +468,18 @@ public class AddActivity extends Activity {
                     } // api 키 관련 if
                 } // 인터넷 접속 관련 if
 
-                else    // 인터넷이 안될 때
+
+
+                // 인터넷이 안될 때
+                else
                 {
-                    if(myImageBitmap != null)
+                    if(imagePath != null)
                     {
-                        if(imagePath != null)
-                            loc.setPhotoRealPath(imagePath);
-
-                        loc.setSync(0);
-                        dba.insertLocation(loc);
+                        loc.setPhotoRealPath(imagePath);
                     }
 
-                    else
-                    {
-                        loc.setSync(0);
-                        dba.insertLocation(loc);
-                    }
+                    loc.setSync(0);
+                    dba.insertLocation(loc);
 
                     finish();
                 }
@@ -475,6 +489,9 @@ public class AddActivity extends Activity {
     } // onCreate
 
 
+
+
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -482,6 +499,13 @@ public class AddActivity extends Activity {
         if(imagePath != null) {
             outState.putString("imagePath", imagePath);
         }
+
+        if(imageURI != null) {
+
+        }
+
+
+
     }
 
     @Override
@@ -494,38 +518,17 @@ public class AddActivity extends Activity {
             if( requestCode == 81 || requestCode == 82 )
             {
                 imageURI = data.getData();
+                imagePath = getRealPathFromURI(imageURI);
+                myImage.setImageURI(imageURI);
 
-                Cursor cursor = null;
-                try
-                {
-                    String[] proj = { MediaStore.Images.Media.DATA };
-                    cursor = AddActivity.this.getContentResolver().query(imageURI,  proj, null, null, null);
-                    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                    cursor.moveToFirst();
-                    imagePath = cursor.getString(column_index);
-                }
-
-                finally
-                {
-                    if (cursor != null)
-                    {
-                        cursor.close();
-                    }
-                }
-
-
-                try {
-                    myImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
-                    if( myImageBitmap != null )
-                        myImage.setImageBitmap(myImageBitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            } // else if 82
+            } // else if 81  || 82
 
         } // if RESULT_OK
     } // onActivityResult
+
+
+
+
 
     private void sendLocation()
     {
@@ -533,6 +536,9 @@ public class AddActivity extends Activity {
         json.addProperty("credential", dba.getSettings().getUsername()+":"+dba.getSettings().getApiKey());
         new SendLocationTask().execute(json);
     }
+
+
+
 
     private void sendPhoto(JsonObject json)
     {
@@ -546,6 +552,11 @@ public class AddActivity extends Activity {
         }
     };
 
+
+
+
+
+
     private class SendLocationTask extends SendDataTask
     {
         @Override
@@ -556,6 +567,11 @@ public class AddActivity extends Activity {
         }
     }
 
+
+
+
+
+
     private class SendPhotoTask extends SendPicTask
     {
         @Override
@@ -565,12 +581,35 @@ public class AddActivity extends Activity {
             progressDialog.dismiss();
 
             loc.setPhotoId(photoFileName);
+            tmpFile.delete();
+
             sendLocation();
+
+
 
             loc.setSync(1);
             dba.insertLocation(loc);
 
             finish();
         }
+    }
+
+
+
+
+
+    private String getRealPathFromURI(Uri contentURI) {
+        String result;
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = getContentResolver().query(contentURI, proj, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = contentURI.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
     }
 }

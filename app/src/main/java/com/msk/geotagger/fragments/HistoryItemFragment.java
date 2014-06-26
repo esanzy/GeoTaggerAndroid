@@ -1,7 +1,6 @@
 package com.msk.geotagger.fragments;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -88,69 +87,95 @@ public class HistoryItemFragment extends Fragment
 
         chkQ1_1.setChecked(checkBool(loc.getEvanType()));
         chkQ1_1.setClickable(false);
+        chkQ1_1.setFocusable(false);
         chkQ1_2.setChecked(checkBool(loc.getTrainType()));
         chkQ1_2.setClickable(false);
+        chkQ1_2.setFocusable(false);
         chkQ1_3.setChecked(checkBool(loc.getMercyType()));
         chkQ1_3.setClickable(false);
+        chkQ1_3.setFocusable(false);
 
         chkQ2_1.setChecked(checkBool(loc.getYouthType()));
         chkQ2_1.setClickable(false);
+        chkQ2_1.setFocusable(false);
         chkQ2_2.setChecked(checkBool(loc.getCampusType()));
         chkQ2_2.setClickable(false);
+        chkQ2_2.setFocusable(false);
         chkQ2_3.setChecked(checkBool(loc.getIndigenousType()));
         chkQ2_3.setClickable(false);
+        chkQ2_3.setFocusable(false);
         chkQ2_4.setChecked(checkBool(loc.getPrisonType()));
         chkQ2_4.setClickable(false);
+        chkQ2_4.setFocusable(false);
         chkQ2_5.setChecked(checkBool(loc.getProstitutesType()));
         chkQ2_5.setClickable(false);
+        chkQ2_5.setFocusable(false);
         chkQ2_6.setChecked(checkBool(loc.getOrphansType()));
         chkQ2_6.setClickable(false);
+        chkQ2_6.setFocusable(false);
         chkQ2_7.setChecked(checkBool(loc.getWomenType()));
         chkQ2_7.setClickable(false);
+        chkQ2_7.setFocusable(false);
         chkQ2_8.setChecked(checkBool(loc.getUrbanType()));
         chkQ2_8.setClickable(false);
+        chkQ2_8.setFocusable(false);
         chkQ2_9.setChecked(checkBool(loc.getHospitalType()));
         chkQ2_9.setClickable(false);
+        chkQ2_9.setFocusable(false);
         chkQ2_10.setChecked(checkBool(loc.getMediaType()));
         chkQ2_10.setClickable(false);
+        chkQ2_10.setFocusable(false);
         chkQ2_11.setChecked(checkBool(loc.getCommunityDevType()));
         chkQ2_11.setClickable(false);
+        chkQ2_11.setFocusable(false);
         chkQ2_12.setChecked(checkBool(loc.getBibleStudyType()));
         chkQ2_12.setClickable(false);
+        chkQ2_12.setFocusable(false);
         chkQ2_13.setChecked(checkBool(loc.getChurchPlantingType()));
         chkQ2_13.setClickable(false);
+        chkQ2_13.setFocusable(false);
         chkQ2_14.setChecked(checkBool(loc.getArtsType()));
         chkQ2_14.setClickable(false);
+        chkQ2_14.setFocusable(false);
         chkQ2_15.setChecked(checkBool(loc.getCounselingType()));
         chkQ2_15.setClickable(false);
+        chkQ2_15.setFocusable(false);
         chkQ2_16.setChecked(checkBool(loc.getHealthcareType()));
         chkQ2_16.setClickable(false);
+        chkQ2_16.setFocusable(false);
         chkQ2_17.setChecked(checkBool(loc.getConstructionType()));
         chkQ2_17.setClickable(false);
+        chkQ2_17.setFocusable(false);
         chkQ2_18.setChecked(checkBool(loc.getResearchType()));
         chkQ2_18.setClickable(false);
+        chkQ2_18.setFocusable(false);
 
         editText1.setText(loc.getDesc());
         editText1.setClickable(false);
+        editText1.setFocusable(false);
         editText2.setText(loc.getTags());
         editText2.setClickable(false);
+        editText2.setFocusable(false);
 
         chkQ5.setChecked(checkBool(loc.getContactConfirmed()));
         chkQ5.setClickable(false);
+        chkQ5.setFocusable(false);
 
         editText3.setText(loc.getContactEmail());
         editText3.setClickable(false);
+        editText3.setFocusable(false);
         editText4.setText(loc.getContactPhone());
         editText4.setClickable(false);
+        editText4.setFocusable(false);
         editText5.setText(loc.getContactWebsite());
         editText5.setClickable(false);
+        editText5.setFocusable(false);
 
         if(loc.getPhotoRealPath() != null && !"".equals(loc.getPhotoRealPath())) {
             File imgFile = new File(loc.getPhotoRealPath());
             if (imgFile.exists()) {
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                myImage.setImageBitmap(myBitmap);
-                myImage.invalidate();
+                Uri imageURI = Uri.fromFile(imgFile);
+                myImage.setImageURI(imageURI);
             }
         }
 

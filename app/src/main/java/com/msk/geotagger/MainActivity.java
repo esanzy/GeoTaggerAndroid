@@ -111,9 +111,19 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     public void onConnected(Bundle bundle)
     {
         Location location = mLocationClient.getLastLocation();
-        lat = location.getLatitude();
-        lon = location.getLongitude();
 
+        if(location == null)
+        {
+            // mock location
+            lat = 47.905034;
+            lon = 106.924488;
+
+            // TODO show dialog
+        }
+        else {
+            lat = location.getLatitude();
+            lon = location.getLongitude();
+        }
         tagFragment.setLocation(lat, lon);
     }
 
