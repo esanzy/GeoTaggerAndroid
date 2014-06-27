@@ -1,11 +1,14 @@
 package com.msk.geotagger;
 
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -51,15 +54,28 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
                             .commit();
                 }
             });
+
         }
 
 
+        final ImageView tag = (ImageView)findViewById(R.id.btnTag);
+        final ImageView history = (ImageView)findViewById(R.id.History);
+        final ImageView settings = (ImageView)findViewById(R.id.Settings);
+
+        final TextView tagText = (TextView) findViewById(R.id.textView);
+        final TextView historyText = (TextView) findViewById(R.id.textView2);
+        final TextView settingsText = (TextView) findViewById(R.id.textView3);
 
 
 
-        ImageView tag = (ImageView)findViewById(R.id.btnTag);
-        ImageView history = (ImageView)findViewById(R.id.History);
-        ImageView settings = (ImageView)findViewById(R.id.Settings);
+
+
+
+
+
+        tag.setBackgroundColor(Color.parseColor("#7a9aea"));
+        tagText.setBackgroundColor(Color.parseColor("#7a9aea"));
+
 
         tag.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,6 +87,15 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.container, tagFragment)
                         .commit();
+
+                tag.setBackgroundColor(Color.parseColor("#7a9aea"));
+                tagText.setBackgroundColor(Color.parseColor("#7a9aea"));
+                history.setBackgroundColor(Color.WHITE);
+                historyText.setBackgroundColor(Color.WHITE);
+                settings.setBackgroundColor(Color.WHITE);
+                settingsText.setBackgroundColor(Color.WHITE);
+
+
             }
         });
 
@@ -80,6 +105,14 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.container, new HistoryFragment())
                         .commit();
+
+
+                tag.setBackgroundColor(Color.WHITE);
+                tagText.setBackgroundColor(Color.WHITE);
+                history.setBackgroundColor(Color.parseColor("#7a9aea"));
+                historyText.setBackgroundColor(Color.parseColor("#7a9aea"));
+                settings.setBackgroundColor(Color.WHITE);
+                settingsText.setBackgroundColor(Color.WHITE);
             }
         });
 
@@ -89,6 +122,13 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.container, new SettingsFragment())
                         .commit();
+
+                tag.setBackgroundColor(Color.WHITE);
+                tagText.setBackgroundColor(Color.WHITE);
+                history.setBackgroundColor(Color.WHITE);
+                historyText.setBackgroundColor(Color.WHITE);
+                settings.setBackgroundColor(Color.parseColor("#7a9aea"));
+                settingsText.setBackgroundColor(Color.parseColor("#7a9aea"));
             }
         });
     } // onCreate
@@ -105,6 +145,13 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     {
         mLocationClient.disconnect();
         super.onStop();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+
     }
 
     @Override
@@ -126,6 +173,8 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
         }
         tagFragment.setLocation(lat, lon);
     }
+
+
 
     @Override
     public void onDisconnected()

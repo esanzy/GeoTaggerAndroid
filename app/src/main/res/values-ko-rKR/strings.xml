@@ -67,4 +67,8 @@
     <string name="title_activity_add">AddActivity</string>
     <string name="auth_error">인증 오류</string>
     <string name="apikey_missing">Username 이나 API 키가 없습니다.</string>
+    <string name="apikey_invalid">Username 이나 Api 키가 올바르지 않습니다!!</string>
+    <string name="offline_loc_info">오프라인 모드에서는 지도가 표시되지 않습니다.</string>
+    <string name="lat">위도</string>
+    <string name="lon">경도</string>
 </resources>

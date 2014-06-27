@@ -31,8 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dip"
             android:id="@+id/scrollView"
-            android:layout_weight="1"
-            android:paddingBottom="10dp">
+            android:layout_weight="1">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -509,17 +508,18 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="400dp"
+                    android:layout_height="300dp"
                     android:orientation="vertical"
                     android:background = "#efefef">
 
                     <ImageView
                         android:id="@+id/myImage"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="250dp"
+                        android:layout_height="250dp"
                         android:layout_marginBottom="15dp"
                         android:layout_marginTop="15dp"
-                        />
+                        android:scaleType="fitStart"
+                        android:layout_gravity="center_horizontal" />
                 </LinearLayout>
 
 
@@ -588,7 +588,8 @@
                     android:id="@+id/editText5"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="10" />
+                    android:ems="10"
+                    android:layout_marginBottom="45dp" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"

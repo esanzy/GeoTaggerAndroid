@@ -67,4 +67,8 @@
     <string name="title_activity_add">AddActivity</string>
     <string name="auth_error">Authentication Error</string>
     <string name="apikey_missing">Username or Api Key is Missing!!</string>
+    <string name="apikey_invalid">Username or Api Key is Invalid!!</string>
+    <string name="offline_loc_info">Map is not displayed in Offline Mode</string>
+    <string name="lat">Latitude</string>
+    <string name="lon">Longitude</string>
 </resources>

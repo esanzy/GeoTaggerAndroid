@@ -135,7 +135,7 @@ public class DBAdapter
 
     /**
      * @since 2014-05-08 이준원
-     * @update 2014-05-08 이준원
+     * update 2014-05-08 이준원
      * 
      */
     public List<Location> selectLocations(String sql)
@@ -253,7 +253,7 @@ public class DBAdapter
 
     public long editSettings(Settings param)
     {
-        long result = 0;
+        long result;
         try
         {
             db = (new DBHelper(context).getWritableDatabase());
@@ -295,9 +295,7 @@ public class DBAdapter
 
         if(c.moveToFirst())
         {
-            int count = c.getInt(c.getColumnIndex("unsynced"));
-
-            return count;
+            return c.getInt(c.getColumnIndex("unsynced"));
         }
 
         else

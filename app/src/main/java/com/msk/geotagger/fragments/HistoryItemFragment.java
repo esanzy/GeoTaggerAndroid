@@ -23,7 +23,6 @@ import java.io.File;
 public class HistoryItemFragment extends Fragment
 {
     private int rowid;
-    private DBAdapter db;
 
     public HistoryItemFragment()
     {
@@ -41,7 +40,7 @@ public class HistoryItemFragment extends Fragment
 
         View v = getView();
 
-        db = new DBAdapter(getActivity());
+        DBAdapter db = new DBAdapter(getActivity());
         Location loc = db.selectLocation(rowid);
 
         // 질문 1
@@ -191,14 +190,6 @@ public class HistoryItemFragment extends Fragment
 
     private boolean checkBool(int arg)
     {
-        if(arg > 0)
-        {
-            return true;
-        }
-
-        else
-        {
-            return false;
-        }
+        return (arg > 0);
     }
 }

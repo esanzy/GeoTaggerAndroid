@@ -52,7 +52,7 @@ public class Location
     private String tags;
     private int contactConfirmed;
 
-    private String user;
+    /*private String user;*/
 
     public Date getCreated()
     {
@@ -366,15 +366,15 @@ public class Location
         this.contactConfirmed = contactConfirmed;
     }
 
-    public String getUser()
+    /*public String getUser()
     {
         return user;
-    }
+    }*/
 
-    public void setUser(String user)
+    /*public void setUser(String user)
     {
         this.user = user;
-    }
+    }*/
 
     public int getSync() {
         return sync;
@@ -396,6 +396,7 @@ public class Location
     {
         JsonObject json = new JsonObject();
 
+        json.addProperty("rowid", this.rowid);
 
         json.addProperty("latitude", this.latitude);
         json.addProperty("longitude", this.longitude);
@@ -403,7 +404,7 @@ public class Location
         json.addProperty("created", this.getCreatedTimestamp().toString());
 
         json.addProperty("photoId", this.photoId);
-        //json.addProperty("photoRealPath", this.photoRealPath);
+        json.addProperty("photoRealPath", this.photoRealPath);
 
         json.addProperty("contactEmail", this.contactEmail);
         json.addProperty("contactPhone", this.contactPhone);

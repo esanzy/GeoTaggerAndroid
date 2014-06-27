@@ -2,20 +2,23 @@ package com.msk.geotagger.fragments;
 
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.msk.geotagger.AddActivity;
 import com.msk.geotagger.R;
+import com.msk.geotagger.utils.DBAdapter;
 
 
 /**
@@ -27,7 +30,6 @@ public class TagFragment extends Fragment
     private double latitude;
     private double longitude;
 
-    private WebView map;
 
     public TagFragment()
     {
@@ -60,12 +62,41 @@ public class TagFragment extends Fragment
         });
 
 
-        map = (WebView) v.findViewById(R.id.map);
+        WebView map = (WebView) v.findViewById(R.id.map);
+        RelativeLayout info = (RelativeLayout) v.findViewById(R.id.loc_info);
 
-        map.getSettings().setJavaScriptEnabled(true);
-        map.loadUrl("file:///android_asset/map.html");
-        map.loadUrl("javascript:setLatLng(" + latitude + "," + longitude + ");");
-        map.invalidate();
+
+
+        ConnectivityManager cManager;
+        NetworkInfo mobile;
+        NetworkInfo wifi;
+
+        cManager=(ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        mobile = cManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        wifi = cManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        DBAdapter db = new DBAdapter(getActivity());
+
+        // 인터넷에 연결 되어있을 경우
+        if(db.getSettings().getOffline() == 0 && (mobile.isConnected() || wifi.isConnected())) {
+
+            info.setVisibility(View.GONE);
+            map.setVisibility(View.VISIBLE);
+
+            map.getSettings().setJavaScriptEnabled(true);
+            map.loadUrl("file:///android_asset/map.html?&lat="+latitude+"&lon="+longitude);
+        }
+
+        else
+        {
+            map.setVisibility(View.GONE);
+            info.setVisibility(View.VISIBLE);
+
+            TextView latitude = (TextView) v.findViewById(R.id.latitude);
+            TextView longitude = (TextView) v.findViewById(R.id.longitude);
+
+            latitude.setText(""+this.latitude);
+            longitude.setText(""+this.longitude);
+        }
     }
 
     public void setLatitude(double latitude)

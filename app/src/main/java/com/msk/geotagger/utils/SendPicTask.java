@@ -47,10 +47,14 @@ import java.util.Enumeration;
  */
 public class SendPicTask extends AsyncTask<JsonObject, Void, HttpResponse> {
 
-    private static String TAG = "사진 전송";
+
 
     @Override
     protected HttpResponse doInBackground(JsonObject... jsonObjects) {
+
+
+        String TAG = "사진 전송";
+
 
         HttpClient httpClient = getHttpClient();
         String urlString = Server.host + "/m/locpic/";
@@ -84,11 +88,11 @@ public class SendPicTask extends AsyncTask<JsonObject, Void, HttpResponse> {
             httpPost.setEntity(entity);
 
 
-            HttpResponse response = httpClient.execute(httpPost, new PhotoUploadResponseHandler());
+            //HttpResponse response =
 
             //Log.d("결과", "" + response.getStatusLine().getStatusCode());
             //JsonObject loc = json.get("loc").getAsJsonObject();
-            return response;
+            return httpClient.execute(httpPost, new PhotoUploadResponseHandler());
 
 
         } catch (URISyntaxException e) {
@@ -146,13 +150,13 @@ public class SendPicTask extends AsyncTask<JsonObject, Void, HttpResponse> {
 
         @Override
         public HttpResponse handleResponse(HttpResponse response)
-                throws ClientProtocolException, IOException {
+                throws IOException {
 
             HttpEntity r_entity = response.getEntity();
             String responseString = EntityUtils.toString(r_entity);
             Log.d("UPLOAD", responseString);
 
-            return null;
+            return response;
         }
 
     }

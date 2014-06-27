@@ -28,36 +28,27 @@
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyAuvnD4WuYWb50K27NmHhEgMvDyUXtbXWA&sensor=true"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	<script>
-        var lat;
-        var lng;
         var map;
-
-        function setLatLng(latitude, longitude)
-        {
-            //lat = latitude;
-            //lng = longitude;
-
-            var myLatLng = new google.maps.LatLng(latitude, longitude);
-
-
-
-            map.panTo(myLatLng);
-            setMarkers(myLatLng);
-        }
 
         function initialize()
         {
+            var query = window.location.search.substring(1);
+            var vars = query.split("&");
 
-            var myLatLng = new google.maps.LatLng(33.65, 65.36);
+            var lat = vars[1].split("=")[1];
+            var lon = vars[2].split("=")[1];
+
+            var myLatLng = new google.maps.LatLng(lat, lon);
             var mapOptions;
 
             var mapOptions = {
-                zoom: 5,
+                zoom: 8,
                 center: myLatLng,
                 mapTypeId : google.maps.MapTypeId.ROADMAP
             };
 
             map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+            setMarkers(myLatLng);
         }
 
         function setMarkers(loc) {

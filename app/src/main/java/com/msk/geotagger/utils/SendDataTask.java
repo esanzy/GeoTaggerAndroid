@@ -34,11 +34,11 @@ import java.security.KeyStore;
  */
 public class SendDataTask extends AsyncTask<JsonObject, Void, HttpResponse>
 {
-    private static String TAG = "위치정보 전송";
+
 
     @Override
     protected HttpResponse doInBackground(JsonObject... locations) {
-
+        String TAG = "위치정보 전송";
 
         HttpClient httpClient = getHttpClient();
         String urlString = Server.host + "/api/0.1/location/";

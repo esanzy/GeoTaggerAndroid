@@ -15,11 +15,11 @@ import java.io.OutputStream;
  */
 public class FileUtil
 {
-    private Context mContext;
+    //private Context mContext;
 
     public FileUtil(Context context)
     {
-        mContext = context;
+        /*mContext = context;*/
     }
 
     public File SaveBitmapToFile(Bitmap bitmap, String filename)
@@ -39,17 +39,19 @@ public class FileUtil
 
         try
         {
-            photofilepath.createNewFile();
-            out = new FileOutputStream(photofilepath);
+            if( photofilepath.exists() || photofilepath.createNewFile() ) {
+                out = new FileOutputStream(photofilepath);
 
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
 
-            return photofilepath;
+                return photofilepath;
+            }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+
         finally
         {
             try
