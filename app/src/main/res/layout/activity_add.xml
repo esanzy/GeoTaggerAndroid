@@ -444,12 +444,17 @@
                 <EditText
                     android:id="@+id/editText1"
                     android:layout_width="match_parent"
-                    android:layout_height="80dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
                     android:background="#efefef"
                     android:ems="10"
-                    android:inputType="textMultiLine" />
+                    android:inputType="textMultiLine"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:padding="15dp"
+                    android:paddingBottom="15dp" />
 
                 <TextView
                     android:id="@+id/q4"
@@ -468,12 +473,16 @@
                     tools:ignore="TooManyViews"
                     android:id="@+id/EditText2"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
                     android:background="#efefef"
                     android:ems="10"
-                    android:inputType="textMultiLine" />
+                    android:inputType="textMultiLine"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:padding="15dp"
+                    android:paddingTop="15dp" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"
