@@ -67,6 +67,14 @@ public class DialogManager
         alertDialogBuilder.show();
     }
 
+    public void showGPSWarning()
+    {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+        alertDialogBuilder.setTitle("GPS Warning");
+        alertDialogBuilder.setMessage("GPS가 켜져있는지 확인해주세요");
+        alertDialogBuilder.setPositiveButton("확인", dismissListener);
+        alertDialogBuilder.show();
+    }
 
     private DialogInterface.OnClickListener dismissListener = new DialogInterface.OnClickListener(){
         @Override

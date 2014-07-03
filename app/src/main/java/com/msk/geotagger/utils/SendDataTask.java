@@ -9,6 +9,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -50,12 +51,14 @@ public class SendDataTask extends AsyncTask<JsonObject, Void, HttpResponse>
             HttpPost httpPost = new HttpPost();
             httpPost.setURI(url);
             JsonObject json = locations[0];
-            httpPost.setHeader("Content-Type", "application/json");
+            httpPost.setHeader("Content-Type", "application/json; charset=utf-8");
             httpPost.setHeader("Authorization", "ApiKey "+json.get("credential").getAsString());
 
             json.remove("credential");
 
-            StringEntity params = new StringEntity(json.toString());
+            StringEntity params = new StringEntity(json.toString(), HTTP.UTF_8);
+
+
             httpPost.setEntity(params);
 
             HttpResponse response = httpClient.execute(httpPost);

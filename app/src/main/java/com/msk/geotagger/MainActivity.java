@@ -19,6 +19,7 @@ import com.google.android.gms.location.LocationClient;
 import com.msk.geotagger.fragments.HistoryFragment;
 import com.msk.geotagger.fragments.SettingsFragment;
 import com.msk.geotagger.fragments.TagFragment;
+import com.msk.geotagger.utils.DialogManager;
 
 
 public class MainActivity extends FragmentActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener
@@ -165,12 +166,15 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
         if(location == null)
         {
             // mock location
-            lat = 47.905034;
-            lon = 106.924488;
+            //lat = 47.905034;
+            //lon = 106.924488;
 
-            // TODO show dialog
+            DialogManager dialogManager = new DialogManager(MainActivity.this);
+            dialogManager.showGPSWarning();
         }
-        else {
+
+        else
+        {
             lat = location.getLatitude();
             lon = location.getLongitude();
         }

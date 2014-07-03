@@ -12,6 +12,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.msk.geotagger.model.Location;
 import com.msk.geotagger.utils.DBAdapter;
@@ -20,6 +21,7 @@ import com.msk.geotagger.model.Settings;
 import com.msk.geotagger.utils.DialogManager;
 import com.msk.geotagger.utils.SendDataTask;
 import com.msk.geotagger.utils.SendPicTask;
+import com.msk.geotagger.utils.SyncPicTask;
 
 import org.apache.http.HttpResponse;
 import java.io.File;
@@ -34,6 +36,8 @@ public class SettingsFragment extends Fragment
     private List<Location> list;
     private DBAdapter db;
     private TextView tvSyncData;
+
+    private JsonArray jsonArray;
 
     public SettingsFragment()
     {
@@ -187,9 +191,10 @@ public class SettingsFragment extends Fragment
 
                     list = db.selectUnsyncedLocation();
 
-                    progressDialog.show();
+                    //progressDialog.show();
 
 
+                    jsonArray = new JsonArray();
                     for ( int i = 0; i < list.size(); i++ ) {
 
 
@@ -209,8 +214,14 @@ public class SettingsFragment extends Fragment
                             json.addProperty("username", db.getSettings().getUsername());
                             json.addProperty("filepath", tmpFile.getAbsolutePath());
 
-                            sendPhoto(json, loc);
 
+                            sendLocation(loc);
+
+                            if(tmpFile != null)
+                            {
+                                jsonArray.add(json);
+                                //sendPhoto(json, progressDialog/*, loc*/);
+                            }
                         }
 
                         // 사진이 없는 경우
@@ -220,48 +231,30 @@ public class SettingsFragment extends Fragment
                         }
 
                     } // for
-
+                    sendPhoto(jsonArray);
                     //progressDialog.dismiss();
                 } // api key check
             } // onClick
         }); // setOnClickListener
     } // onActivityCreated
 
-    private void sendPhoto(JsonObject json, Location loc)
+    private void sendPhoto(JsonArray json)
     {
-        SendPhotoTask task = new SendPhotoTask();
-        task.setLoc(loc);
+        if(!progressDialog.isShowing())
+            progressDialog.show();
+
+        SyncPicTask task = new SyncPicTask() {
+            @Override
+            protected void onPostExecute(Void aVoid)
+            {
+                super.onPostExecute(aVoid);
+
+                if(progressDialog.isShowing())
+                    progressDialog.dismiss();
+            }
+        };
         task.execute(json);
     }
-
-    private class SendPhotoTask extends SendPicTask
-    {
-        private Location loc;
-
-        protected void setLoc(Location loc)
-        {
-            this.loc = loc;
-        }
-
-        @Override
-        protected void onPostExecute(HttpResponse httpResponse) {
-            super.onPostExecute(httpResponse);
-
-
-            if(httpResponse.getStatusLine().getStatusCode() == 401)
-            {
-                DialogManager dialogManager = new DialogManager(getActivity());
-                dialogManager.showApiKeyInvalidDialog();
-            }
-
-            else {
-                sendLocation(loc);
-            }
-        }
-    }
-
-
-
 
     private void sendLocation(Location loc)
     {
@@ -299,12 +292,12 @@ public class SettingsFragment extends Fragment
                 int numSyncData = db.countUnsyncedData();
                 String txtSyncData = "You need to sync " + numSyncData + " data";
 
-
+/*
                 if(numSyncData == 0)
                 {
                     if(progressDialog.isShowing()) progressDialog.dismiss();
                 }
-
+*/
                 tvSyncData.setText(txtSyncData);
                 tvSyncData.invalidate();
 
